@@ -13,7 +13,7 @@
   if __FILE__ == $0
 
     tester = Connection.new
-    tester.testNew
+    tester.testNewer
 
     class QtApp < Qt::Widget
 
@@ -33,6 +33,6 @@
 
     app = Qt::Application.new ARGV
     QtApp.new
-    app.exec
+  #  app.exec
 
   end
