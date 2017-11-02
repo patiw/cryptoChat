@@ -1,7 +1,7 @@
 #Encryption and decryption of messages
   class Encryption
 
-    def caesar_cipher(string, shift)
+    def encrypt(string, shift)
       alphabet  = Array('a'..'z')
       non_caps  = Hash[alphabet.zip(alphabet.rotate(shift))]
 
@@ -13,7 +13,7 @@
       string.chars.map { |c| encrypter.fetch(c, c) }
     end
 
-    def caesar_cipher2(string, shift)
+    def decrypt(string, shift)
       alphabet  = Array('a'..'z')
       non_caps  = Hash[alphabet.zip(alphabet.rotate(shift))]
 

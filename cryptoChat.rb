@@ -12,8 +12,25 @@
 #"main"
   if __FILE__ == $0
 
-    tester = Connection.new
-    tester.testNewer
+    message = Encryption.new
+
+    loop do
+        puts "Write something: (type qqqqq to exit)"
+        x = $stdin.gets.chomp!
+
+        break if x == "qqqqq"
+
+        puts "Encrypted text: "
+        x = message.encrypt(x, 3)
+        x = x * ""
+        puts x
+
+        puts "After decryption: "
+        x = message.decrypt(x, -3)
+        x = x * ""
+        puts x
+        print "\n"
+    end
 
     class QtApp < Qt::Widget
 
