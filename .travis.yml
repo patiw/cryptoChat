@@ -1,0 +1,8 @@
+before_install: 
+  - "gem update --system"
+  - "gem --version"
+  - "gem install bundler"
+language: ruby
+rvm: 
+  - 2.2
+
