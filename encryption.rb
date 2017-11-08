@@ -204,6 +204,7 @@ end
 #Patches for String class
 ##################################
 class String
+=begin
   #Deletes end lines
   def delete_end_lines
     self.gsub("\n",'\n')
@@ -215,7 +216,7 @@ class String
   def recover_end_lines
     self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
   end
-
+=end
   #Convert string of chars into 8bit modules
   def to_bytes
     bytearr = Array.new
@@ -346,7 +347,7 @@ class Encryption
     key_a, key_b = key.split  #Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
-    c = @message.delete_end_lines.to_bytes.to_bits
+    c = @message.to_bytes.to_bits#delete_end_lines.to_bytes.to_bits
     c = des_encrypt(c, keys_a) #Use first key
     c = des_decrypt(c, keys_b) #Use second key
     c = des_encrypt(c, keys_a) #Use first key again
@@ -360,9 +361,9 @@ class Encryption
     keys_a = expand(key_a)
     keys_b = expand(key_b)
     c = @message
-    c = des_decrypt(c, keys_a) #Use first key
-    c = des_encrypt(c, keys_b) #Use second key
-    c = des_decrypt(c, keys_a) #Use first key again
-    return c                   #Returns the decrypted array
+    c = des_decrypt(c, keys_a)  #Use first key
+    c = des_encrypt(c, keys_b)  #Use second key
+    c = des_decrypt(c, keys_a)  #Use first key again
+    return c.blocks(8).to_text #Returns the decrypted array
   end
 end
