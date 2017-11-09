@@ -204,8 +204,7 @@ end
 #Patches for String class
 ##################################
 class String
-=begin
->>>>>>> .
+
   #Deletes end lines
   def delete_end_lines
     self.gsub("\n",'\n')
@@ -217,10 +216,7 @@ class String
   def recover_end_lines
     self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
   end
-<<<<<<< 58a2f6a1834513545dbdddedf3db74b6d80f83fe
 
-=======
-=end
   #Convert string of chars into 8bit modules
   def to_bytes
     bytearr = Array.new

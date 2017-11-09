@@ -1,4 +1,3 @@
-
 #Test of Qt-lib
 
 #Requested gems and files
@@ -72,7 +71,7 @@
 
     app = Qt::Application.new ARGV
     QtApp.new
-  #  app.exec
+    app.exec
 =end
 
   end
