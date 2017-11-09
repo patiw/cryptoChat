@@ -204,6 +204,8 @@ end
 #Patches for String class
 ##################################
 class String
+=begin
+>>>>>>> .
   #Deletes end lines
   def delete_end_lines
     self.gsub("\n",'\n')
@@ -215,7 +217,10 @@ class String
   def recover_end_lines
     self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
   end
+<<<<<<< 58a2f6a1834513545dbdddedf3db74b6d80f83fe
 
+=======
+=end
   #Convert string of chars into 8bit modules
   def to_bytes
     bytearr = Array.new
@@ -346,7 +351,7 @@ class Encryption
     key_a, key_b = key.split  #Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
-    c = @message.delete_end_lines.to_bytes.to_bits
+    c = @message.to_bytes.to_bits#delete_end_lines.to_bytes.to_bits
     c = des_encrypt(c, keys_a) #Use first key
     c = des_decrypt(c, keys_b) #Use second key
     c = des_encrypt(c, keys_a) #Use first key again
@@ -360,9 +365,68 @@ class Encryption
     keys_a = expand(key_a)
     keys_b = expand(key_b)
     c = @message
-    c = des_decrypt(c, keys_a) #Use first key
-    c = des_encrypt(c, keys_b) #Use second key
-    c = des_decrypt(c, keys_a) #Use first key again
-    return c                   #Returns the decrypted array
+    c = des_decrypt(c, keys_a)  #Use first key
+    c = des_encrypt(c, keys_b)  #Use second key
+    c = des_decrypt(c, keys_a)  #Use first key again
+    return c.blocks(8).to_text #Returns the decrypted array
   end
+end
+
+##################################
+#Key Generator
+##################################
+class XorshiftGen
+
+  UINT32_C = 2**32
+  UINT64_C = 2**64
+  UINT64_Cm = UINT64_C - 1
+  UINT64_Cf = UINT64_C.to_f
+
+  def initialize( seed = new_seed )
+    srand( seed )
+    @old_seed = @seed
+  end
+
+  def new_seed
+    n = Time.now
+    @@counter ||= 0
+    @@counter += 1
+    [n.usec % 65536, n.to_i % 65536, $$ ^ 65536, @@counter % 65536 ].collect {|x| x.to_s(16)}.join.to_i(16)
+  end
+
+  def srand( seed = new_seed )
+    @old_seed = @seed
+    @seed = seed % UINT64_C
+  end
+
+  def rand( n = 0)
+    @seed ^= @seed >> 12
+    @seed ^= @seed << 25
+    @seed ^= @seed >> 27
+    if n < 1
+      ( ( @seed * 2685821657736338717 ) % UINT64_C ) / UINT64_Cf
+    else
+      ( ( @seed * 2685821657736338717 ) % UINT64_C ) % Integer( n )
+    end
+  end
+
+  def seed
+    @old_seed
+  end
+
+  def ==(v)
+    self.class == v.class && @old_seed == v.seed
+  end
+
+  def bytes(size)
+    buffer = ""
+    ( size / 8 ).times { buffer << [rand(UINT64_Cm)].pack("L").unpack("B*").join }
+
+    if size % 8 != 0
+      buffer << [rand(UINT64_Cm)].pack("L").unpack("B*")[0..(size % 8 - 1)].join
+    end
+
+    buffer
+  end
+
 end
