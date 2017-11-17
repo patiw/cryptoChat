@@ -52,191 +52,108 @@
     #    sleep(5)
     #end
 
-begin
-  class Ui_CryptoChatMainWindow
-      attr_reader :actionAddContact
-      attr_reader :actionDeleteContact
-      attr_reader :actionImportContacts
-      attr_reader :actionExportContacts
-      attr_reader :actionAbout
-      attr_reader :actionQuit
-      attr_reader :centralwidget
-      attr_reader :verticalLayoutWidget
-      attr_reader :vLayout
-      attr_reader :textEdit
-      attr_reader :verticalLayoutWidget_2
-      attr_reader :vLayout2
-      attr_reader :messageWindow
-      attr_reader :horizontalLayoutWidget
-      attr_reader :hLayout
-      attr_reader :contactsView
-      attr_reader :verticalScrollBar
-      attr_reader :label
-      attr_reader :sendText
-      attr_reader :clearText
-      attr_reader :menuBar
-      attr_reader :menu_Menu
-      attr_reader :menu_Contacts
+  class QtApp < Qt::MainWindow
+    slots 'about()', 'sztuczka()'
 
-      def setupUi(cryptoChatMainWindow)
-        if cryptoChatMainWindow.objectName.nil?
-            cryptoChatMainWindow.objectName = "cryptoChatMainWindow"
-      end
+    def initialize
+      super
 
-      cryptoChatMainWindow.enabled = true
-      cryptoChatMainWindow.resize(600, 560)
-      cryptoChatMainWindow.maximumSize = Qt::Size.new(600, 560)
-      @actionAddContact = Qt::Action.new(cryptoChatMainWindow)
-      @actionAddContact.objectName = "actionAddContact"
-      @actionDeleteContact = Qt::Action.new(cryptoChatMainWindow)
-      @actionDeleteContact.objectName = "actionDeleteContact"
-      @actionImportContacts = Qt::Action.new(cryptoChatMainWindow)
-      @actionImportContacts.objectName = "actionImportContacts"
-      @actionExportContacts = Qt::Action.new(cryptoChatMainWindow)
-      @actionExportContacts.objectName = "actionExportContacts"
-      @actionAbout = Qt::Action.new(cryptoChatMainWindow)
-      @actionAbout.objectName = "actionAbout"
-      @actionAbout.checkable = false
-      @actionQuit = Qt::Action.new(cryptoChatMainWindow)
-      @actionQuit.objectName = "actionQuit"
-      @centralwidget = Qt::Widget.new(cryptoChatMainWindow)
-      @centralwidget.objectName = "centralwidget"
-      @verticalLayoutWidget = Qt::Widget.new(@centralwidget)
-      @verticalLayoutWidget.objectName = "verticalLayoutWidget"
-      @verticalLayoutWidget.geometry = Qt::Rect.new(10, 20, 401, 381)
-      @vLayout = Qt::VBoxLayout.new(@verticalLayoutWidget)
-      @vLayout.objectName = "vLayout"
-      @vLayout.setContentsMargins(0, 0, 0, 0)
-      @textEdit = Qt::TextEdit.new(@verticalLayoutWidget)
-      @textEdit.objectName = "textEdit"
-      @textEdit.enabled = false
-      @textEdit.frameShape = Qt::Frame::Box
-      @textEdit.frameShadow = Qt::Frame::Plain
+      setWindowTitle 'cryptoChat'
 
-      @vLayout.addWidget(@textEdit)
+      setToolTip 'To jest okienko cryptoChatu'
 
-      @verticalLayoutWidget_2 = Qt::Widget.new(@centralwidget)
-      @verticalLayoutWidget_2.objectName = "verticalLayoutWidget_2"
-      @verticalLayoutWidget_2.geometry = Qt::Rect.new(10, 410, 401, 83)
-      @vLayout2 = Qt::VBoxLayout.new(@verticalLayoutWidget_2)
-      @vLayout2.objectName = "vLayout2"
-      @vLayout2.setContentsMargins(0, 0, 0, 0)
-      @messageWindow = Qt::TextEdit.new(@verticalLayoutWidget_2)
-      @messageWindow.objectName = "messageWindow"
+      init_ui
 
-      @vLayout2.addWidget(@messageWindow)
+      setFixedSize(560, 600)
 
-      @horizontalLayoutWidget = Qt::Widget.new(@centralwidget)
-      @horizontalLayoutWidget.objectName = "horizontalLayoutWidget"
-      @horizontalLayoutWidget.geometry = Qt::Rect.new(420, 20, 170, 471)
-      @hLayout = Qt::HBoxLayout.new(@horizontalLayoutWidget)
-      @hLayout.objectName = "hLayout"
-      @hLayout.setContentsMargins(0, 0, 0, 0)
-      @contactsView = Qt::ListView.new(@horizontalLayoutWidget)
-      @contactsView.objectName = "contactsView"
-
-      @hLayout.addWidget(@contactsView)
-
-      @verticalScrollBar = Qt::ScrollBar.new(@horizontalLayoutWidget)
-      @verticalScrollBar.objectName = "verticalScrollBar"
-      @verticalScrollBar.orientation = Qt::Vertical
-
-      @hLayout.addWidget(@verticalScrollBar)
-
-      @label = Qt::Label.new(@centralwidget)
-      @label.objectName = "label"
-      @label.geometry = Qt::Rect.new(420, 0, 56, 17)
-      @sendText = Qt::PushButton.new(@centralwidget)
-      @sendText.objectName = "sendText"
-      @sendText.geometry = Qt::Rect.new(320, 500, 85, 27)
-      @clearText = Qt::PushButton.new(@centralwidget)
-      @clearText.objectName = "clearText"
-      @clearText.geometry = Qt::Rect.new(230, 500, 85, 27)
-      cryptoChatMainWindow.centralWidget = @centralwidget
-      @menuBar = Qt::MenuBar.new(cryptoChatMainWindow)
-      @menuBar.objectName = "menuBar"
-      @menuBar.geometry = Qt::Rect.new(0, 0, 600, 27)
-      @menu_Menu = Qt::Menu.new(@menuBar)
-      @menu_Menu.objectName = "menu_Menu"
-      @menu_Contacts = Qt::Menu.new(@menuBar)
-      @menu_Contacts.objectName = "menu_Contacts"
-      cryptoChatMainWindow.setMenuBar(@menuBar)
-
-      @menuBar.addAction(@menu_Menu.menuAction())
-      @menuBar.addAction(@menu_Contacts.menuAction())
-      @menu_Menu.addAction(@actionAbout)
-      @menu_Menu.addSeparator()
-      @menu_Menu.addAction(@actionQuit)
-      @menu_Contacts.addAction(@actionAddContact)
-      @menu_Contacts.addAction(@actionDeleteContact)
-      @menu_Contacts.addAction(@actionImportContacts)
-      @menu_Contacts.addAction(@actionExportContacts)
-
-      retranslateUi(cryptoChatMainWindow)
-
-      Qt::Object.connect(@actionQuit, SIGNAL('triggered(bool)'), cryptoChatMainWindow, SLOT('close()'))
-      Qt::Object.connect(@verticalScrollBar, SIGNAL('sliderMoved(int)'), @contactsView, SLOT('scrollToBottom()'))
-      Qt::Object.connect(@clearText, SIGNAL('clicked()'), @messageWindow, SLOT('clear()'))
-
-      Qt::MetaObject.connectSlotsByName(cryptoChatMainWindow)
-      end # setupUi
-
-      def setup_ui(cryptoChatMainWindow)
-          setupUi(cryptoChatMainWindow)
-      end
-
-      def retranslateUi(cryptoChatMainWindow)
-      cryptoChatMainWindow.windowTitle = Qt::Application.translate("cryptoChatMainWindow", "cryptoChat", nil, Qt::Application::UnicodeUTF8)
-      @actionAddContact.text = Qt::Application.translate("cryptoChatMainWindow", "&Add new contact", nil, Qt::Application::UnicodeUTF8)
-      @actionAddContact.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Ctrl+A", nil, Qt::Application::UnicodeUTF8)
-      @actionDeleteContact.text = Qt::Application.translate("cryptoChatMainWindow", "&Delete contact", nil, Qt::Application::UnicodeUTF8)
-      @actionDeleteContact.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Ctrl+D", nil, Qt::Application::UnicodeUTF8)
-      @actionImportContacts.text = Qt::Application.translate("cryptoChatMainWindow", "&Import your contacts", nil, Qt::Application::UnicodeUTF8)
-      @actionImportContacts.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Ctrl+I", nil, Qt::Application::UnicodeUTF8)
-      @actionExportContacts.text = Qt::Application.translate("cryptoChatMainWindow", "Export contacts to a file", nil, Qt::Application::UnicodeUTF8)
-      @actionExportContacts.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Ctrl+E", nil, Qt::Application::UnicodeUTF8)
-      @actionAbout.text = Qt::Application.translate("cryptoChatMainWindow", "About", nil, Qt::Application::UnicodeUTF8)
-      @actionAbout.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Ctrl+H", nil, Qt::Application::UnicodeUTF8)
-      @actionQuit.text = Qt::Application.translate("cryptoChatMainWindow", "&Quit", nil, Qt::Application::UnicodeUTF8)
-      @actionQuit.shortcut = Qt::Application.translate("cryptoChatMainWindow", "Esc", nil, Qt::Application::UnicodeUTF8)
-      @textEdit.html = Qt::Application.translate("cryptoChatMainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n" \
-        "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n" \
-        "p, li { white-space: pre-wrap; }\n" \
-        "</style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\">\n" \
-        "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>", nil, Qt::Application::UnicodeUTF8)
-      @messageWindow.html = Qt::Application.translate("cryptoChatMainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n" \
-        "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n" \
-        "p, li { white-space: pre-wrap; }\n" \
-        "</style></head><body style=\" font-family:'Noto Sans'; font-size:9pt; font-weight:400; font-style:normal;\">\n" \
-        "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p></body></html>", nil, Qt::Application::UnicodeUTF8)
-      @label.text = Qt::Application.translate("cryptoChatMainWindow", "Contacts", nil, Qt::Application::UnicodeUTF8)
-      @sendText.text = Qt::Application.translate("cryptoChatMainWindow", "Send", nil, Qt::Application::UnicodeUTF8)
-      @clearText.text = Qt::Application.translate("cryptoChatMainWindow", "Clear", nil, Qt::Application::UnicodeUTF8)
-      @menu_Menu.title = Qt::Application.translate("cryptoChatMainWindow", "&Menu", nil, Qt::Application::UnicodeUTF8)
-      @menu_Contacts.title = Qt::Application.translate("cryptoChatMainWindow", "&Contacts", nil, Qt::Application::UnicodeUTF8)
-      end # retranslateUi
-
-      def retranslate_ui(cryptoChatMainWindow)
-          retranslateUi(cryptoChatMainWindow)
-      end
-
-      def onchanged text
-        @textEdit.setText text
-      end
-  end #class
-
-  module Ui
-      class CryptoChatMainWindow < Ui_CryptoChatMainWindow
-      end
-  end  # module Ui
-
-    if $0 == __FILE__
-        a = Qt::Application.new(ARGV)
-        u = Ui_CryptoChatMainWindow.new
-        w = Qt::MainWindow.new
-        u.setupUi(w)
-        w.show
-        a.exec
+      show
     end
+
+    def init_ui
+      hel = Qt::Action.new '&Help', self
+      quit = Qt::Action.new '&Quit', self
+      quit.setShortcut 'Esc'
+      hel.setShortcut 'Ctrl+H'
+      dod = Qt::Action.new '&Add new contact', self
+      usu = Qt::Action.new '&Delete a contact', self
+      imp = Qt::Action.new '&Import contacts from file', self
+      exp = Qt::Action.new '&Export contacts to a file', self
+
+      file = menuBar.addMenu '&Menu'
+      file.addAction hel
+      file.addAction quit
+
+      kont = menuBar.addMenu '&Contacts'
+      kont.addAction dod
+      kont.addAction usu
+      kont.addAction imp
+      kont.addAction exp
+
+      connect(quit, SIGNAL('triggered()'),
+              Qt::Application.instance, SLOT('quit()'))
+
+      vbox = Qt::VBoxLayout.new self
+      vbox1 = Qt::VBoxLayout.new
+      hbox1 = Qt::HBoxLayout.new
+      hbox2 = Qt::HBoxLayout.new
+      hbox3 = Qt::HBoxLayout.new
+
+      # vbox1.addWidget about
+      clearButt = Qt::PushButton.new "Clear", self
+      @sendButt = Qt::PushButton.new "Send", self
+
+      clearButt.geometry = Qt::Rect.new(230, 560, 70, 27)
+      @sendButt.geometry = Qt::Rect.new(310, 560, 70, 27)
+
+      connect(hel, SIGNAL('triggered()'),
+              self, SLOT('about()'))
+
+      label = Qt::Label.new 'Kontakty', self
+
+      @edit = Qt::TextEdit.new self
+      @edit.setEnabled true
+
+      hbox1.addWidget @edit
+      @edit.resize 360, 400
+      @edit.move 20, 40
+
+      @edit2 = Qt::TextEdit.new self
+      @edit2.setEnabled true
+
+      hbox2.addWidget @edit2
+      @edit2.resize 360, 100
+      @edit2.move 20, 450
+
+      connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
+      connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sztuczka()'))
+
+      contacts = Qt::ListView.new self
+
+      vbox1.addWidget label
+      label.move 390, 15
+
+      vbox1.addWidget contacts
+      contacts.resize 150, 510
+      contacts.move 390, 40
+
+    end
+
+    def about
+      Qt::MessageBox.about self, 'About', 'Zobaczymy'
+    end
+
+    def sztuczka
+      @plik = File.open('message.txt', 'a+')
+      @plik.puts(@edit2.toPlainText())
+      connect(@sendButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
+      stringText = File.read('message.txt')
+      @edit.setText(stringText)
+      @plik.close
+    end
+
   end
+
+  app = Qt::Application.new ARGV
+  QtApp.new
+  app.exec
 end
