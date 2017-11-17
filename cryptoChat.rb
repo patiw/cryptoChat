@@ -1,62 +1,77 @@
-#Test of Qt-lib
+# Test of Qt-lib
 
-#Requested gems and files
+# Requested gems and files
   require 'Qt4'
   require './connection'
   require './encryption'
   require './message'
   require './user'
-  #in future classes gonna be pushed outside and linked here
-  #awaiting for Patryk to decide on server choice
+  require 'thread'
+  # in future classes gonna be pushed outside and linked here
+  # awaiting for Patryk to decide on server choice
 
-#"main"
-  if __FILE__ == $0
+# "main"
+if $PROGRAM_NAME == __FILE__
 
-    #key must be entered before the message process
-    #suggestion: make the key generator and loading in other place
-    a = XorshiftGen.new
-    key = a.bytes(32).scan(/......../)
-    key = key*" "
+    # key must be entered before the message process
+    # suggestion: make the key generator and loading in other place
+    # a = XorshiftGen.new
+    # key = a.bytes(32).scan(/......../)
+    # key = key*" "
 
-    x = File.read('text').chomp
+    # x = File.read('text').chomp
 
-    #loop do
-        #puts "Write something: (type qqqqq to exit)"
+    # loop do
+        # puts "Write something: (type qqqqq to exit)"
     #    break if x == ""
 
-        #x = $stdin.gets.chomp
+        # x = $stdin.gets.chomp
     #    break if x == "qqqqq"
     #    puts x
 
     #    puts "Encrypted text: "
-        #make class with initial varaibles of message and key
+        # make class with initial varaibles of message and key
     #    message1 = Encryption.new(x, key)
-        #x1 is the output of 3DES encrypt witch is an array
+        # x1 is the output of 3DES encrypt witch is an array
     #    x1 = message1.tripledes_encrypt
-        #format the array to readable form
+        # format the array to readable form
     #    puts x1.blocks(8).to_text
 
     #    puts "After decryption: "
-        #make class with initial varaibles of message and key
+        # make class with initial varaibles of message and key
     #    message2 = Encryption.new(x1, key)
-        #x2 is the output of 3DES decrypt witch is an array
+        # x2 is the output of 3DES decrypt witch is an array
     #    x2 = message2.tripledes_decrypt
-        #format the array to readable form
+        # format the array to readable form
     #    puts x2#.recover_end_lines
 
     #    tmpArr = x.split("")
     #    tmpArr.shift(8)
     #    x = tmpArr.join
 
-        ###TO DO: make x1 a string and encrypt the string, not an array
+        ### TO DO: make x1 a string and encrypt the string, not an array
     #    sleep(5)
-    #end
+    # end
 
+  # QtApp patch for cryptoChat satisfy
   class QtApp < Qt::MainWindow
-    slots 'about()', 'sztuczka()'
+    attr_writer :on_time_up
+    slots 'about()', 'sendText()', 'refreshText()'
 
     def initialize
       super
+
+      # Use Timer for "multi-threading"
+      # Main idea is we call some function in main app.exec thread
+      # on time specified after timer expires. To refresh text we
+      # only function called later and make sure it's slot type.
+      # Timer needs to be instance variable since app is an instance.
+      # No need for threading now. It's quite difficult to combine
+      # QtRubyBindings with Ruby Threading. In futute we can make
+      # more and more timers executing different functions.
+      @timer = Qt::Timer.new(self)
+      connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
+      @timer.start(10)
 
       setWindowTitle 'cryptoChat'
 
@@ -92,11 +107,11 @@
       connect(quit, SIGNAL('triggered()'),
               Qt::Application.instance, SLOT('quit()'))
 
-      vbox = Qt::VBoxLayout.new self
+      # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
       hbox1 = Qt::HBoxLayout.new
       hbox2 = Qt::HBoxLayout.new
-      hbox3 = Qt::HBoxLayout.new
+      # hbox3 = Qt::HBoxLayout.new
 
       # vbox1.addWidget about
       clearButt = Qt::PushButton.new "Clear", self
@@ -125,7 +140,7 @@
       @edit2.move 20, 450
 
       connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
-      connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sztuczka()'))
+      connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sendText()'))
 
       contacts = Qt::ListView.new self
 
@@ -142,18 +157,21 @@
       Qt::MessageBox.about self, 'About', 'Zobaczymy'
     end
 
-    def sztuczka
-      @plik = File.open('message.txt', 'a+')
-      @plik.puts(@edit2.toPlainText())
-      connect(@sendButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
+    def refreshText
       stringText = File.read('message.txt')
       @edit.setText(stringText)
-      @plik.close
     end
 
+    def sendText
+      @plik = File.open('message.txt', 'a+')
+      @plik.puts(@edit2.toPlainText())
+      @edit2.clear
+      @plik.close
+    end
   end
 
-  app = Qt::Application.new ARGV
-  QtApp.new
-  app.exec
+    app = Qt::Application.new ARGV
+    QtApp.new
+
+    app.exec
 end
