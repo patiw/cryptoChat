@@ -206,16 +206,16 @@ end
 class String
 
   #Deletes end lines
-  def delete_end_lines
-    self.gsub("\n",'\n')
-  end
+  # def delete_end_lines
+  #   self.gsub("\n",'\n')
+  # end
 
   #TO DO: try this with real text
   #Sometimes it change n to nothing
   #Recovers end lines from decrypted message
-  def recover_end_lines
-    self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
-  end
+  # def recover_end_lines
+  #  self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
+  # end
 
   #Convert string of chars into 8bit modules
   def to_bytes
@@ -255,10 +255,9 @@ class String
 
   #Convert string of 8bit blocks into text
   def to_text(n = 8)
-    bytearr = Array.new
     byte    = String.new
     output  = String.new
-    self.each_char{|c, i|
+    self.each_char{|c|
       byte += c.to_s if c!=' '
       if (byte.length)%n == 0
         output += byte.to_i(2).chr
