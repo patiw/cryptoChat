@@ -8,14 +8,19 @@ require './key'
 # Message module responsible for coresponding with files, database
 module Message
   def refreshTextBox(box)
-    stringText = File.read('message.txt')
-    box.setText(stringText)
+    stringText = File.read('message')
+    # puts stringText
+    stringText = stringText.encode('UTF-8', :invalid => :replace)
+    stringText = stringText.scan(/.{1,8}/)
+    textHistory = CipherMessage::decode(stringText)
+    box.setText(textHistory)
   end
 
   def sendTextBox(box, adres)
     file = File.open(adres, 'a+')
     sendMessage = box.toPlainText
     sendMessage = CipherMessage::init(sendMessage)
+    sendMessage = sendMessage.force_encoding('UTF-8')
     file.puts(sendMessage)
     box.clear
     file.close
@@ -54,10 +59,10 @@ module CipherMessage
     @text.each do |block|
       message1 = Encryption.new(block, @key)
       x1 = message1.tripledes_encrypt
-      puts x1.blocks(8).to_text
+      #puts x1.blocks(8).to_text
       cipherMessage << x1.blocks(8).to_text
     end
-    puts @key
+    #puts @key
     return cipherMessage
   end
 
@@ -68,11 +73,26 @@ module CipherMessage
       if block.size < 8
         (8-block.size).times do
           # Add spaces yo make block 8 chars
-          block << " "
+          block << "*"
+          #puts block
         end
       end
     end
   end
 
-  module_function :init, :mapText
+  def decode(sText)
+    decryptMessage = ""
+    sText.each do |block|
+      # puts block
+      code = block.to_bytes.to_bits
+      # puts code
+      message1 = Encryption.new(code, @key)
+      x1 = message1.tripledes_decrypt
+      # puts x1
+      decryptMessage << x1.force_encoding('UTF-8')
+    end
+    return decryptMessage
+  end
+
+  module_function :init, :mapText, :decode
 end

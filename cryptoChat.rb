@@ -163,7 +163,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def trunc
-      Message::deleteContent('message.txt')
+      Message::deleteContent('message')
     end
 
     def refreshText
@@ -171,7 +171,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def sendText
-      Message::sendTextBox(@edit2,'message.txt')
+      Message::sendTextBox(@edit2,'message')
     end
   end
 
