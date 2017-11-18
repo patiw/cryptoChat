@@ -157,15 +157,11 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def refreshText
-      stringText = File.read('message.txt')
-      @edit.setText(stringText)
+      Message::refreshTextBox(@edit)
     end
 
     def sendText
-      @plik = File.open('message.txt', 'a+')
-      @plik.puts(@edit2.toPlainText)
-      @edit2.clear
-      @plik.close
+      Message::sendTextBox(@edit2,'message.txt')
     end
   end
 
