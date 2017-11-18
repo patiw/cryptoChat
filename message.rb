@@ -3,6 +3,7 @@
 ##############
 # Require the encryption.rb file for de/encrypt text
 require './encryption'
+require './key'
 
 # Message module responsible for coresponding with files, database
 module Message
@@ -20,30 +21,43 @@ module Message
     file.close
   end
 
-  module_function :refreshTextBox, :sendTextBox
+  def deleteContent(adres)
+    file = File.open(adres, 'a+')
+    file.truncate(0)
+    file.close
+  end
+
+  module_function :refreshTextBox, :sendTextBox, :deleteContent
+end
+
+module GenerateKey
+  def genkey
+    a = XorshiftGen.new
+    key = a.bytes(32).scan(/......../)
+    key = key*" "
+  return key
+  end
+
+  module_function :genkey
 end
 
 # Module for message transform
 module CipherMessage
+  @key = GenerateKey::genkey
+
   def init(text)
     @text = text
     # Map text into 8 char blocks
     mapText
-    # Generate key, make it somewhere else
-    # So it can be called during life of app
-    # Without changes
-    a = XorshiftGen.new
-    key = a.bytes(32).scan(/......../)
-    key = key*" "
     # Encrypt given text
     cipherMessage = ""
     @text.each do |block|
-      message1 = Encryption.new(block, key)
+      message1 = Encryption.new(block, @key)
       x1 = message1.tripledes_encrypt
       puts x1.blocks(8).to_text
       cipherMessage << x1.blocks(8).to_text
     end
-    puts cipherMessage
+    puts @key
     return cipherMessage
   end
 
