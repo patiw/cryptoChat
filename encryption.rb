@@ -363,6 +363,6 @@ class Encryption
     c = des_decrypt(c, keys_a)  #Use first key
     c = des_encrypt(c, keys_b)  #Use second key
     c = des_decrypt(c, keys_a)  #Use first key again
-    return c.blocks(8).to_text #Returns the decrypted array
+    return c #Returns the decrypted array
   end
 end

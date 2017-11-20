@@ -8,26 +8,31 @@ require './key'
 # Message module responsible for coresponding with files, database
 module Message
   def refreshTextBox(box)
-    stringText = File.read('message')
+    stringText = File.binread('message')
     # puts stringText
-    stringText = stringText.encode('UTF-8', :invalid => :replace)
-    stringText = stringText.scan(/.{1,8}/)
+    stringText = stringText.unpack("B*")[0]
+    #puts stringText
+    stringText = stringText[0...64].scan(/.{1,8}/)
+    # puts stringText
     textHistory = CipherMessage::decode(stringText)
+    # puts textHistory
     box.setText(textHistory)
   end
 
   def sendTextBox(box, adres)
-    file = File.open(adres, 'a+')
-    sendMessage = box.toPlainText
+    sendMessage = box.toPlainText.chomp
+    #puts sendMessage.encoding
     sendMessage = CipherMessage::init(sendMessage)
-    sendMessage = sendMessage.force_encoding('UTF-8')
-    file.puts(sendMessage)
+    puts sendMessage.is_a? Array
+    puts sendMessage * " "
+    file = File.open(adres,'ab+') do |output|
+      output.write [sendMessage.join].pack("B*")
+    end
     box.clear
-    file.close
   end
 
   def deleteContent(adres)
-    file = File.open(adres, 'a+')
+    file = File.open(adres, 'ab+')
     file.truncate(0)
     file.close
   end
@@ -48,19 +53,20 @@ end
 
 # Module for message transform
 module CipherMessage
-  @key = GenerateKey::genkey
-
+#  @key = GenerateKey::genkey
+  @key = '01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010 01101010'
   def init(text)
     @text = text
     # Map text into 8 char blocks
     mapText
     # Encrypt given text
-    cipherMessage = ""
+    cipherMessage = []
     @text.each do |block|
       message1 = Encryption.new(block, @key)
       x1 = message1.tripledes_encrypt
-      #puts x1.blocks(8).to_text
-      cipherMessage << x1.blocks(8).to_text
+      # puts x1
+      # puts x1.blocks(8).to_text
+      cipherMessage << x1.blocks(8)#.to_text
     end
     #puts @key
     return cipherMessage
@@ -88,8 +94,9 @@ module CipherMessage
       # puts code
       message1 = Encryption.new(code, @key)
       x1 = message1.tripledes_decrypt
+      x1 = x1.blocks(8).to_text
       # puts x1
-      decryptMessage << x1.force_encoding('UTF-8')
+      decryptMessage << x1
     end
     return decryptMessage
   end
