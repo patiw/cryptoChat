@@ -68,7 +68,7 @@ if $PROGRAM_NAME == __FILE__
       # more and more timers executing different functions.
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(10)
+      @timer.start(10000)
 
       setWindowTitle 'cryptoChat'
 
