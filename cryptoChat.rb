@@ -14,42 +14,6 @@
 # "main"
 if $PROGRAM_NAME == __FILE__
 
-    # key must be entered before the message process
-    # suggestion: make the key generator and loading in other place
-
-    #x = File.read('text').chomp
-
-    #loop do
-        #puts "Write something: (type qqqqq to exit)"
-        #break if x == ""
-
-        #x = $stdin.gets.chomp
-       #puts x
-
-       #puts "Encrypted text: "
-        # make class with initial varaibles of message and key
-       #message1 = Encryption.new(x, key)
-        # x1 is the output of 3DES encrypt witch is an array
-       #x1 = message1.tripledes_encrypt
-        # format the array to readable form
-       #puts x1.blocks(8).to_text
-
-       #puts "After decryption: "
-        # make class with initial varaibles of message and key
-       #message2 = Encryption.new(x1, key)
-        # x2 is the output of 3DES decrypt witch is an array
-       #x2 = message2.tripledes_decrypt
-        # format the array to readable form
-       #puts x2 # .recover_end_lines
-
-       #tmpArr = x.split("")
-       #tmpArr.shift(8)
-       #x = tmpArr.join
-
-        ### TO DO: make x1 a string and encrypt the string, not an array
-       #sleep(5)
-    #end
-
   # QtApp patch for cryptoChat satisfy
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
@@ -68,7 +32,7 @@ if $PROGRAM_NAME == __FILE__
       # more and more timers executing different functions.
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(10000)
+      @timer.start(100)
 
       setWindowTitle 'cryptoChat'
 
