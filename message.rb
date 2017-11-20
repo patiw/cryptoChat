@@ -10,10 +10,11 @@ module Message
   def refreshTextBox(box)
     stringText = File.binread('message')
     # puts stringText
+    return if stringText==""
     stringText = stringText.unpack("B*")[0]
     #puts stringText
-    stringText = stringText[0...64].scan(/.{1,8}/)
-    # puts stringText
+    stringText = stringText.scan(/.{1,64}/)
+    puts stringText
     textHistory = CipherMessage::decode(stringText)
     # puts textHistory
     box.setText(textHistory)
@@ -23,10 +24,12 @@ module Message
     sendMessage = box.toPlainText.chomp
     #puts sendMessage.encoding
     sendMessage = CipherMessage::init(sendMessage)
-    puts sendMessage.is_a? Array
-    puts sendMessage * " "
+    # puts sendMessage.is_a? Array
+    sendMessage = sendMessage.join
+    sendMessage.gsub!(" ", '')
+    puts sendMessage
     file = File.open(adres,'ab+') do |output|
-      output.write [sendMessage.join].pack("B*")
+      output.write [sendMessage].pack("B*")
     end
     box.clear
   end
@@ -90,13 +93,13 @@ module CipherMessage
     decryptMessage = ""
     sText.each do |block|
       # puts block
-      code = block.to_bytes.to_bits
+      code = block.to_bits
       # puts code
-      message1 = Encryption.new(code, @key)
-      x1 = message1.tripledes_decrypt
-      x1 = x1.blocks(8).to_text
+      message2 = Encryption.new(code, @key)
+      x2 = message2.tripledes_decrypt
+      x2 = x2.blocks(8).to_text.force_encoding("ASCII-8BIT")
       # puts x1
-      decryptMessage << x1
+      decryptMessage << x2
     end
     return decryptMessage
   end

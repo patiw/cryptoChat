@@ -87,6 +87,7 @@ if $PROGRAM_NAME == __FILE__
       quit = Qt::Action.new '&Quit', self
       quit.setShortcut 'Esc'
       hel.setShortcut 'Ctrl+H'
+      clr.setShortcut 'Ctrl+Delete'
       dod = Qt::Action.new '&Add new contact', self
       usu = Qt::Action.new '&Delete a contact', self
       imp = Qt::Action.new '&Import contacts from file', self
