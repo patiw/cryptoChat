@@ -27,7 +27,7 @@ module Message
     # puts sendMessage.is_a? Array
     sendMessage = sendMessage.join
     sendMessage.gsub!(" ", '')
-    puts sendMessage
+    #puts sendMessage
     file = File.open(adres,'ab+') do |output|
       output.write [sendMessage].pack("B*")
     end
@@ -90,6 +90,14 @@ module CipherMessage
   end
 
   def decode(sText)
+
+    encoding_options = {
+    :invalid           => :replace,  # Replace invalid byte sequences
+    :undef             => :replace,  # Replace anything not defined in ASCII
+    :replace           => '',        # Use a blank for those replacements
+    #:universal_newline => true       # Always break lines with \n
+    }
+
     decryptMessage = ""
     sText.each do |block|
       # puts block
@@ -97,9 +105,10 @@ module CipherMessage
       # puts code
       message2 = Encryption.new(code, @key)
       x2 = message2.tripledes_decrypt
-      x2 = x2.blocks(8).to_text.force_encoding("ASCII-8BIT")
-      # puts x1
-      decryptMessage << x2
+      x2 = x2.blocks(8).to_text#, :invalid => :replace, :replace => ' ')
+      x2.gsub!("*", "")
+      puts x2.encode(Encoding.find('ASCII'), encoding_options)
+      decryptMessage << x2.encode(Encoding.find('UTF-8'), encoding_options)
     end
     return decryptMessage
   end
