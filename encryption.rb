@@ -150,35 +150,35 @@ class Array
       7 11  4 1  9 12 14  2  0  6 10 13 15  3  5  8
       2  1 14 7  4 10  8 13 15 12  9  0  3  5  6 11
       "
-    #Pick the table we need
+    # Pick the table we need
     s_table = s_tables[s_tables.index('S%d'%b)+3,999]
     s_table = s_table[0,s_table.index('S')] if s_table.index('S')
     s_table = s_table.split(' ')
-    #Find row from the first and last bits
+    # Find row from the first and last bits
     row = self.first*2 + self.last
-    #The column is from the middle 4 bits
+    # The column is from the middle 4 bits
     col = self[1]*8 + self[2]*4 + self[3]*2 + self[4]
-    #Find correct value, then convert to 4 bits output
+    # Find correct value, then convert to 4 bits output
     return s_table[row*16+col].to_i.to_bits
   end
 
-  #Shift this array one or two bits left
+  # Shift this array one or two bits left
   def left(n)
     self[n,self.length] + self[0,n]
   end
 
-  #Xor operation on two arrays
+  # Xor operation on two arrays
   def xor(b)
     i=0
     self.map{|a| i+=1; a^b[i-1]}
   end
 
-  #Split array in half
+  # Split array in half
   def split
     [self[0,self.length/2], self[self.length/2,self.length/2]]
   end
 
-  #Splits into arrays of 6 bits
+  # Splits into arrays of 6 bits
   def split6
     arr=[]
     subarr=[]
@@ -192,7 +192,7 @@ class Array
     return arr
   end
 
-  #Convert array to blocks of 8 chars separated by space
+  # Convert array to blocks of 8 chars separated by space
   def blocks(n=8)
     s=""
     self.each_with_index{|bit,i| s+=bit.to_s; s+=' ' if (i+1)%n==0}

@@ -17,7 +17,7 @@ if $PROGRAM_NAME == __FILE__
   # QtApp patch for cryptoChat satisfy
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
-    slots 'about()', 'sendText()', 'refreshText()', 'trunc()'
+    slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()'
 
     def initialize
       super
@@ -69,12 +69,8 @@ if $PROGRAM_NAME == __FILE__
       kont.addAction exp
 
 
-      connect(hel, SIGNAL('triggered()'),
-              self, SLOT('about()'))
-
-      connect(clr, SIGNAL('triggered()'),
-              self, SLOT('trunc()'))
-
+      connect(hel, SIGNAL('triggered()'), self, SLOT('about()'))
+      connect(clr, SIGNAL('triggered()'), self, SLOT('clearHistory()'))
       connect(quit, SIGNAL('triggered()'),
               Qt::Application.instance, SLOT('quit()'))
 
@@ -94,7 +90,7 @@ if $PROGRAM_NAME == __FILE__
       clearButt.setShortcut('Ctrl+Backspace')
       @sendButt.setShortcut('Ctrl+Return')
 
-      label = Qt::Label.new 'Kontakty', self
+      label = Qt::Label.new 'Contacts', self
 
       @edit = Qt::TextEdit.new self
       @edit.setEnabled true
@@ -127,8 +123,8 @@ if $PROGRAM_NAME == __FILE__
       Qt::MessageBox.about self, 'About', 'Zobaczymy'
     end
 
-    def trunc
-      Message::deleteContent('message')
+    def clearHistory
+      Message::deleteContent(@edit, 'message')
     end
 
     def refreshText
