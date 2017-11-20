@@ -1,6 +1,17 @@
 ##################################
 # Key Generator
 ##################################
+module GenerateKey
+  def genkey
+    a = XorshiftGen.new
+    key = a.bytes(32).scan(/......../)
+    key = key*" "
+  return key
+  end
+
+  module_function :genkey
+end
+
 class XorshiftGen
 
   UINT32_C = 2**32

@@ -32,7 +32,7 @@ if $PROGRAM_NAME == __FILE__
       # more and more timers executing different functions.
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(100)
+      @timer.start(10)
 
       setWindowTitle 'cryptoChat'
 
@@ -139,7 +139,10 @@ if $PROGRAM_NAME == __FILE__
       Message::sendTextBox(@edit2,'message')
     end
   end
-
+    ####################################################
+    #TO DELETE LATER
+    Message::checkIfFileExist
+    ####################################################
     app = Qt::Application.new ARGV
     QtApp.new
 

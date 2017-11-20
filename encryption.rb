@@ -205,18 +205,6 @@ end
 ##################################
 class String
 
-  #Deletes end lines
-  # def delete_end_lines
-  #   self.gsub("\n",'\n')
-  # end
-
-  #TO DO: try this with real text
-  #Sometimes it change n to nothing
-  #Recovers end lines from decrypted message
-  # def recover_end_lines
-  #  self.gsub(/[\\n]/, '\\'=>"\n", 'n' => "")
-  # end
-
   #Convert string of chars into 8bit modules
   def to_bytes
     bytearr = Array.new
@@ -346,7 +334,7 @@ class Encryption
     key_a, key_b = key.split  #Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
-    c = @message.to_bytes.to_bits#delete_end_lines.to_bytes.to_bits
+    c = @message.to_bytes.to_bits
     c = des_encrypt(c, keys_a) #Use first key
     c = des_decrypt(c, keys_b) #Use second key
     c = des_encrypt(c, keys_a) #Use first key again
