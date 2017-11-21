@@ -1,14 +1,14 @@
 ##################################
-#Patches for Array class
+# Patches for Array class
 ##################################
 class Array
-  #Perform a bitwise permutation on array, using the picked permutation
+  # Perform a bitwise permutation on array, using the picked permutation
   def perm(table)
     table.split(' ').map{|bit| self[bit.to_i-1] }
   end
 
-  #PC1 permutation
-  #Return 56 bits "K+" from original key"K"
+  # PC1 permutation
+  # Return 56 bits "K+" from original key"K"
   def pc1
     perm "
       57 49 41 33 25 17  9
@@ -21,7 +21,7 @@ class Array
       21 13  5 28 20 12  4"
   end
 
-  #PC2 permutation
+  # PC2 permutation
   def pc2
     perm "
       14 17 11 24  1  5
@@ -34,8 +34,8 @@ class Array
       46 42 50 36 29 32"
   end
 
-  #Initial permutation, first action preform on message
-  #Inputs 64 bits, outputs 64 bits
+  # Initial permutation, first action preform on message
+  # Inputs 64 bits, outputs 64 bits
   def ip
     perm "
       58 50 42 34 26 18 10 2
@@ -48,8 +48,8 @@ class Array
       63 55 47 39 31 23 15 7"
   end
 
-  #E-Bit selection table
-  #Inputs 32 bits and outputs 48 bits
+  # E-Bit selection table
+  # Inputs 32 bits and outputs 48 bits
   def e_bits
     perm "
       32  1  2  3  4  5
@@ -62,8 +62,8 @@ class Array
       28 29 30 31 32  1"
   end
 
-  #The P permutation
-  #Inputs 32 bits, outputs 32 bits
+  # The P permutation
+  # Inputs 32 bits, outputs 32 bits
   def perm_p
     perm "
       16  7 20 21
@@ -76,8 +76,8 @@ class Array
       22 11  4 25"
   end
 
-  #The IP^-1 final permutation
-  #Inputs 64 bits, outputs 64 bits
+  # The IP^-1 final permutation
+  # Inputs 64 bits, outputs 64 bits
   def ip_inverse
     perm "
       40 8 48 16 56 24 64 32
@@ -90,7 +90,7 @@ class Array
       33 1 41  9 49 17 57 25"
   end
 
-  #S-boxes
+  # S-boxes
   def s_box(b)
     s_tables = "
 
@@ -205,13 +205,30 @@ end
 ##################################
 class String
 
-  #Convert string of chars into 8bit modules
+  # Convert string of chars into 8bit modules
   def to_bytes
     bytearr = Array.new
     output  = String.new
-    #Adding 0's to the begining of converted integers
-    #Since Ruby conversion makes it to the first used bit
+    # Adding 0's to the begining of converted integers
+    # Since Ruby conversion makes it to the first used bit
     self.each_char{|c|
+    # Little optimalization of the loop
+      if c.ord > 63
+        bytearr << "0" + c.ord.to_s(2)
+      elsif c.ord > 31
+        bytearr << "00" + c.ord.to_s(2)
+      elsif c.ord > 15
+        bytearr << "000" + c.ord.to_s(2)
+      elsif c.ord > 7
+        bytearr << "0000" + c.ord.to_s(2)
+      elsif c.ord > 3
+        bytearr << "00000" + c.ord.to_s(2)
+      elsif c.ord > 1
+        bytearr << "000000" + c.ord.to_s(2)
+      else
+        bytearr << "0000000" + c.ord.to_s(2)
+      end
+=begin
       if c.ord < 2
       bytearr << "0000000" +  c.ord.to_s(2)
       elsif c.ord < 4
@@ -227,21 +244,22 @@ class String
       else
       bytearr << "0" + c.ord.to_s(2)
       end
+=end
     }
     bytearr.each{|b| output += b + " "}
-    #Getting rid of the last space
+    # Getting rid of the last space
     output = output.chomp(' ')
     return output
   end
 
-  #Convert a 1-0 string into an array of bits
+  # Convert a 1-0 string into an array of bits
   def to_bits
     bitarr = Array.new
     self.each_char{|c| bitarr << c.to_i if c=='0' || c=='1'}
     return bitarr
   end
 
-  #Convert string of 8bit blocks into text
+  # Convert string of 8bit blocks into text
   def to_text(n = 8)
     byte    = String.new
     output  = String.new
@@ -257,7 +275,7 @@ class String
 end
 
 ##################################
-#Patches for Integer class
+# Patches for Integer class
 ##################################
 class Integer
   # Converts an integer into a 4-bit array, as used by the s-boxes
@@ -267,7 +285,7 @@ class Integer
 end
 
 ##################################
-#Functions used in program
+# Functions used in program
 ##################################
 class Encryption
   #Initialize class with input
@@ -276,20 +294,20 @@ class Encryption
     @key = key
   end
 
-  #Shifting for making CnDn
+  # Shifting for making CnDn
   def shifts(c0,d0)
     cn, dn = [c0], [d0]
-    #Each CnDn is produced by shifting the previous by 1 or 2 bits
+    # Each CnDn is produced by shifting the previous by 1 or 2 bits
     [1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1].each{|n|
       cn << cn.last.left(n)
       dn << dn.last.left(n)
     }
     cdn=[]
-    cn.zip(dn){|c,d| cdn << (c+d)} #Sum the c's and d's to produce CDn
+    cn.zip(dn){|c,d| cdn << (c+d)} # Sum the c's and d's to produce CDn
     return cdn
   end
 
-  #Function used in the encryption rounds
+  # Function used in the encryption rounds
   def f(r,k)
     e = r.e_bits
     x = e.xor(k)
@@ -299,7 +317,7 @@ class Encryption
     return s.perm_p
   end
 
-  #Return all subkeys from given key
+  # Return all subkeys from given key
   def expand(k)
     kplus = k.pc1
     c0, d0 = kplus.split
@@ -307,7 +325,7 @@ class Encryption
     return cdn.map{|cd| cd.pc2}
   end
 
-  #Encrypt 8 bytes of message
+  # Encrypt 8 bytes of message
   def des_encrypt(m,keys)
     ip = m.ip
     l, r = ip.split
@@ -317,40 +335,40 @@ class Encryption
     return c
   end
 
-  #Decrypt 8 bytes of message
+  # Decrypt 8 bytes of message
   def des_decrypt(m,keys)
     ip = m.ip
     l, r = ip.split
-    #Run rounds
+    # Run rounds
     (1..16).to_a.reverse.each{|i| l, r = r, l.xor(f(r,keys[i]))}
     rl = r + l
     c = rl.ip_inverse #calculate final text
     return c
   end
 
-  #Encrypt a 64-bit message with key
+  # Encrypt a 64-bit message with key
   def tripledes_encrypt
     key = @key.to_bits
-    key_a, key_b = key.split  #Splits the key in two keys
+    key_a, key_b = key.split  # Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
     c = @message.to_bytes.to_bits
-    c = des_encrypt(c, keys_a) #Use first key
-    c = des_decrypt(c, keys_b) #Use second key
-    c = des_encrypt(c, keys_a) #Use first key again
-    return c                   #Returns the encrypted array
+    c = des_encrypt(c, keys_a) # Use first key
+    c = des_decrypt(c, keys_b) # Use second key
+    c = des_encrypt(c, keys_a) # Use first key again
+    return c                   # Returns the encrypted array
   end
 
-  #Decrypt a 64-bit message with key
+  # Decrypt a 64-bit message with key
   def tripledes_decrypt
     key = @key.to_bits
-    key_a, key_b = key.split   #Splits the key in two keys
+    key_a, key_b = key.split   # Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
     c = @message
-    c = des_decrypt(c, keys_a)  #Use first key
-    c = des_encrypt(c, keys_b)  #Use second key
-    c = des_decrypt(c, keys_a)  #Use first key again
-    return c #Returns the decrypted array
+    c = des_decrypt(c, keys_a)  # Use first key
+    c = des_encrypt(c, keys_b)  # Use second key
+    c = des_decrypt(c, keys_a)  # Use first key again
+    return c # Returns the decrypted array
   end
 end
