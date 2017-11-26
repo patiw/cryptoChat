@@ -41,7 +41,18 @@ if $PROGRAM_NAME == __FILE__
       init_ui
 
       setFixedSize(560, 600)
-
+      setStyleSheet("background-color:
+                     qlineargradient(x1: 0, y1:1.2, x2:0, y2:0,
+                     stop:0 #00CDAA, stop:1 #004E40);");
+      # setFont(Qt::Font.new('Times', 20, Qt::Font::Bold))
+      # palette = Qt::Application::palette();
+      # palette.setColor( QPalette::Text, Qt::red );
+      # palette.setColor( QPalette::WindowText, Qt::red );
+      # palette.setColor( QPalette::ButtonText, Qt::red );
+      # palette.setColor( QPalette::BrightText, Qt::red );
+      # QApplication::setPalette( p );
+      # font.setStyleHint(Qt::Font::Monospace);
+      setFont(font)
       show
     end
 
@@ -57,17 +68,75 @@ if $PROGRAM_NAME == __FILE__
       imp = Qt::Action.new '&Import contacts from file', self
       exp = Qt::Action.new '&Export contacts to a file', self
 
-      file = menuBar.addMenu '&Menu'
-      file.addAction hel
-      file.addAction clr
-      file.addAction quit
+      @menuBar = Qt::MenuBar.new(self)
+      @menuBar.setGeometry(Qt::Rect.new(0, 0, 800, 60))
+      @menuBar.setStyleSheet("QMenuBar {
+                                background-color: transparent;
+                                color: #D9FFF8;
+                              }
+                              QMenuBar:item {
+                                background-color: transparent;
+                              }
+                              QMenuBar:item:selected {
+                                color: #FFF200;
+                              }
+                              QMenuBar:item:pressed {
+                                color: #BFB600;
+                              }")
 
-      kont = menuBar.addMenu '&Contacts'
-      kont.addAction dod
-      kont.addAction usu
-      kont.addAction imp
-      kont.addAction exp
+      @menuFile = Qt::Menu.new(@menuBar)
+      @menuFile.setObjectName('menuFile')
+      @menuFile.setTitle('File')
+      @menuFile.addAction(hel)
+      @menuFile.addAction(clr)
+      @menuFile.addAction(quit)
+      @menuFile.setStyleSheet("QMenu {
+                                border-style: solid;
+                                border-width:1px;
+                                border-color: #D9FFF8;
+                               color: #D9FFF8;
+                               background-color:
+                               qlineargradient(x1: 0, y1:2, x2:0, y2:0,
+                               stop:0 lightgray, stop:1 #004E40);
+                               }
+                               QMenu:item:selected {
+                                 color: #FFF200;
+                                 background-color: #004E40;
+                                 padding: 0px 25px 2px 20px;
+                                 border: 1px solid transparent;
+                               }
+                               QMenu:item:pressed {
+                                 color: #BFB600;
+                               }");
 
+      @menuKont = Qt::Menu.new(@menuBar)
+      @menuKont.setObjectName('menuKont')
+      @menuKont.setTitle('Account')
+      @menuKont.addAction dod
+      @menuKont.addAction usu
+      @menuKont.addAction imp
+      @menuKont.addAction exp
+      @menuKont.setStyleSheet("QMenu {
+                                border-style: solid;
+                                border-width:1px;
+                                border-color: #D9FFF8;
+                               color: #D9FFF8;
+                               background-color:
+                               qlineargradient(x1: 0, y1:2, x2:0, y2:0,
+                               stop:0 lightgray, stop:1 #004E40);
+                               }
+                               QMenu:item:selected {
+                                 color: #FFF200;
+                                 background-color: #004E40;
+                                 padding: 0px 25px 2px 20px;
+                                 border: 1px solid transparent;
+                               }
+                               QMenu:item:pressed {
+                                 color: #BFB600;
+                               }");
+
+      @menuBar.addAction(@menuFile.menuAction())
+      @menuBar.addAction(@menuKont.menuAction())
 
       connect(hel, SIGNAL('triggered()'), self, SLOT('about()'))
       connect(clr, SIGNAL('triggered()'), self, SLOT('clearHistory()'))
@@ -82,7 +151,38 @@ if $PROGRAM_NAME == __FILE__
 
       # vbox1.addWidget about
       clearButt = Qt::PushButton.new "Clear", self
+      clearButt.setStyleSheet("QPushButton {
+                                 background-color: #009A80;
+                                 border-style: solid;
+                                 border-width:1px;
+                                 border-radius:10px;
+                                 border-color: #D9FFF8;
+                                 max-width:100px;
+                                 max-height:50px;
+                                 min-width:30px;
+                                 min-height:30px;
+                               }
+                               QPushButton:pressed {
+                                color: yellow;
+                               }")
+
       @sendButt = Qt::PushButton.new "Send", self
+      @sendButt.setStyleSheet("QPushButton {
+                                 background-color: #009A80;
+                                 border-style: solid;
+                                 border-width:1px;
+                                 border-radius:10px;
+                                 border-color: #D9FFF8;
+                                 max-width:100px;
+                                 max-height:50px;
+                                 min-width:30px;
+                                 min-height:30px;
+                               }
+                               QPushButton:pressed {
+                                color: yellow;
+                               }")
+
+      # @sendButt.pressed::setStyleSheet("color: yellow;")
 
       clearButt.geometry = Qt::Rect.new(230, 560, 70, 27)
       @sendButt.geometry = Qt::Rect.new(310, 560, 70, 27)
@@ -91,6 +191,15 @@ if $PROGRAM_NAME == __FILE__
       @sendButt.setShortcut('Ctrl+Return')
 
       label = Qt::Label.new 'Contacts', self
+      label.setStyleSheet("background-color: #009A80;
+                               border-style: solid;
+                               border-width:2px;
+                               border-radius:5px;
+                               border-color: #D9FFF8;
+                               max-width:100px;
+                               max-height:30px;
+                               min-width:30px;
+                               min-height:30px;")
 
       @edit = Qt::TextEdit.new self
       @edit.setEnabled true
@@ -98,6 +207,7 @@ if $PROGRAM_NAME == __FILE__
       hbox1.addWidget @edit
       @edit.resize 360, 400
       @edit.move 20, 40
+      @edit.setStyleSheet("background-color: white")
 
       @edit2 = Qt::TextEdit.new self
       @edit2.setEnabled true
@@ -105,18 +215,20 @@ if $PROGRAM_NAME == __FILE__
       hbox2.addWidget @edit2
       @edit2.resize 360, 100
       @edit2.move 20, 450
+      @edit2.setStyleSheet("background-color: white")
 
       connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
       connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sendText()'))
 
-      contacts = Qt::ListView.new self
+      @contacts = Qt::ListView.new self
 
       vbox1.addWidget label
-      label.move 390, 15
+      label.move 390, 10
 
-      vbox1.addWidget contacts
-      contacts.resize 150, 510
-      contacts.move 390, 40
+      vbox1.addWidget @contacts
+      @contacts.resize 150, 510
+      @contacts.move 390, 40
+      @contacts.setStyleSheet("background-color: #D9FFF8")
     end
 
     def about
