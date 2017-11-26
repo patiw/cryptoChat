@@ -36,7 +36,7 @@ if $PROGRAM_NAME == __FILE__
 
       setWindowTitle 'cryptoChat'
 
-      setToolTip 'To jest okienko cryptoChatu'
+      setToolTip 'cryptoChat'
 
       init_ui
 
@@ -44,15 +44,6 @@ if $PROGRAM_NAME == __FILE__
       setStyleSheet("background-color:
                      qlineargradient(x1: 0, y1:1.2, x2:0, y2:0,
                      stop:0 #00CDAA, stop:1 #004E40);");
-      # setFont(Qt::Font.new('Times', 20, Qt::Font::Bold))
-      # palette = Qt::Application::palette();
-      # palette.setColor( QPalette::Text, Qt::red );
-      # palette.setColor( QPalette::WindowText, Qt::red );
-      # palette.setColor( QPalette::ButtonText, Qt::red );
-      # palette.setColor( QPalette::BrightText, Qt::red );
-      # QApplication::setPalette( p );
-      # font.setStyleHint(Qt::Font::Monospace);
-      setFont(font)
       show
     end
 
@@ -82,6 +73,12 @@ if $PROGRAM_NAME == __FILE__
                               }
                               QMenuBar:item:pressed {
                                 color: #BFB600;
+                                border-style: solid;
+                                border-width:1px;
+                                border-top-color: #D9FFF8;
+                                border-left-color: #D9FFF8;
+                                border-right-color: #D9FFF8;
+                                border-bottom-color: transparent;
                               }")
 
       @menuFile = Qt::Menu.new(@menuBar)
@@ -163,6 +160,7 @@ if $PROGRAM_NAME == __FILE__
                                  min-height:30px;
                                }
                                QPushButton:pressed {
+                                background-color: #004E40;
                                 color: yellow;
                                }")
 
@@ -179,6 +177,7 @@ if $PROGRAM_NAME == __FILE__
                                  min-height:30px;
                                }
                                QPushButton:pressed {
+                                background-color: #004E40;
                                 color: yellow;
                                }")
 
@@ -228,7 +227,10 @@ if $PROGRAM_NAME == __FILE__
       vbox1.addWidget @contacts
       @contacts.resize 150, 510
       @contacts.move 390, 40
-      @contacts.setStyleSheet("background-color: #D9FFF8")
+      @contacts.setStyleSheet("background-color: #D9FFF8;
+                                border-style: solid;
+                                border-width:3px;
+                                border-color: #D9FFF8;")
     end
 
     def about
