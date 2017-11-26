@@ -148,6 +148,7 @@ if $PROGRAM_NAME == __FILE__
 
       # vbox1.addWidget about
       clearButt = Qt::PushButton.new "Clear", self
+      clearButt.setFont Qt::Font.new "Impact", 12
       clearButt.setStyleSheet("QPushButton {
                                  background-color: #009A80;
                                  border-style: solid;
@@ -165,6 +166,7 @@ if $PROGRAM_NAME == __FILE__
                                }")
 
       @sendButt = Qt::PushButton.new "Send", self
+      @sendButt.setFont Qt::Font.new "Impact", 12
       @sendButt.setStyleSheet("QPushButton {
                                  background-color: #009A80;
                                  border-style: solid;
@@ -190,6 +192,7 @@ if $PROGRAM_NAME == __FILE__
       @sendButt.setShortcut('Ctrl+Return')
 
       label = Qt::Label.new 'Contacts', self
+      label.setFont Qt::Font.new "Impact", 12
       label.setStyleSheet("background-color: #009A80;
                                border-style: solid;
                                border-width:2px;
@@ -206,6 +209,7 @@ if $PROGRAM_NAME == __FILE__
       hbox1.addWidget @edit
       @edit.resize 360, 400
       @edit.move 20, 40
+      @edit.setFont Qt::Font.new "Impact", 11
       @edit.setStyleSheet("background-color: white")
 
       @edit2 = Qt::TextEdit.new self
@@ -214,6 +218,7 @@ if $PROGRAM_NAME == __FILE__
       hbox2.addWidget @edit2
       @edit2.resize 360, 100
       @edit2.move 20, 450
+      @edit2.setFont Qt::Font.new "Impact", 11
       @edit2.setStyleSheet("background-color: white")
 
       connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
@@ -222,6 +227,7 @@ if $PROGRAM_NAME == __FILE__
       @contacts = Qt::ListView.new self
 
       vbox1.addWidget label
+      label.resize 84, 50
       label.move 390, 10
 
       vbox1.addWidget @contacts
