@@ -8,6 +8,8 @@
   require './user'
   require './key'
   require 'thread'
+  gem 'pg'
+  require 'pg'
   # in future classes gonna be pushed outside and linked here
   # awaiting for Patryk to decide on server choice
 
@@ -33,6 +35,29 @@ if $PROGRAM_NAME == __FILE__
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
       @timer.start(10)
+
+      puts 'Version of libpg: ' + PG.library_version.to_s
+      def with_db
+        db = PG.connect(
+          dbname: 'dat_boi',
+          user: 'dat_boi',
+          password: 'cryptochat'
+        )
+        begin
+           yield db
+        ensure
+           db.close
+        end
+      end
+
+      sql = File.open('skrypt.sql', 'rb') { |file| file.read }
+      with_db do |db|
+        begin
+          db.exec(sql)
+        rescue PG::Error
+           #####
+        end
+      end
 
       setWindowTitle 'cryptoChat'
 
