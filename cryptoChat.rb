@@ -24,18 +24,6 @@ if $PROGRAM_NAME == __FILE__
     def initialize
       super
 
-      # Use Timer for "multi-threading"
-      # Main idea is we call some function in main app.exec thread
-      # on time specified after timer expires. To refresh text we
-      # only function called later and make sure it's slot type.
-      # Timer needs to be instance variable since app is an instance.
-      # No need for threading now. It's quite difficult to combine
-      # QtRubyBindings with Ruby Threading. In futute we can make
-      # more and more timers executing different functions.
-      @timer = Qt::Timer.new(self)
-      connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(10)
-
       puts 'Version of libpg: ' + PG.library_version.to_s
       def with_db
         db = PG.connect(
@@ -58,6 +46,18 @@ if $PROGRAM_NAME == __FILE__
            #####
         end
       end
+
+      # Use Timer for "multi-threading"
+      # Main idea is we call some function in main app.exec thread
+      # on time specified after timer expires. To refresh text we
+      # only function called later and make sure it's slot type.
+      # Timer needs to be instance variable since app is an instance.
+      # No need for threading now. It's quite difficult to combine
+      # QtRubyBindings with Ruby Threading. In futute we can make
+      # more and more timers executing different functions.
+      @timer = Qt::Timer.new(self)
+      connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
+      @timer.start(10)
 
       setWindowTitle 'cryptoChat'
 
