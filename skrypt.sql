@@ -1,9 +1,9 @@
-CREATE TABLE chatUser(
+/* CREATE TABLE chatUser(
    id SERIAL PRIMARY KEY NOT NULL,
    serverID VARCHAR,
    login    VARCHAR NOT NULL,
    password VARCHAR NOT NULL
-);
+); */
 
 CREATE TABLE chatMessanges(
 	id SERIAL PRIMARY KEY NOT NULL,
@@ -13,8 +13,9 @@ CREATE TABLE chatMessanges(
 	text TEXT
 );
 
+/*
 CREATE TABLE chatContacts(
 	id SERIAL PRIMARY KEY NOT NULL,
 	name     VARCHAR NOT NULL,
 	serverID VARCHAR NOT NULL
-);
+);*/
