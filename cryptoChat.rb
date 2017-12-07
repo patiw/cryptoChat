@@ -48,6 +48,7 @@ if $PROGRAM_NAME == __FILE__
       end
 
       # Use Timer for "multi-threading"
+      # Zastąpić to potem wątkami!!!
       # Main idea is we call some function in main app.exec thread
       # on time specified after timer expires. To refresh text we
       # only function called later and make sure it's slot type.
@@ -57,7 +58,7 @@ if $PROGRAM_NAME == __FILE__
       # more and more timers executing different functions.
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(10)
+      @timer.start(500)
 
       setWindowTitle 'cryptoChat'
 
