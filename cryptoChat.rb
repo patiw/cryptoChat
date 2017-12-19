@@ -8,6 +8,8 @@
   require './user'
   require './key'
   require 'thread'
+  require 'rest-client'
+  require 'json'
   gem 'pg'
   require 'pg'
   # in future classes gonna be pushed outside and linked here
@@ -27,9 +29,9 @@ if $PROGRAM_NAME == __FILE__
       puts 'Version of libpg: ' + PG.library_version.to_s
       def with_db
         db = PG.connect(
-          dbname: 'dat_boi',
-          user: 'dat_boi',
-          password: 'cryptochat'
+          dbname: 'cryptochat',
+          user: 'cryptochat',
+          password: 'haslo'
         )
         begin
            yield db
@@ -46,6 +48,13 @@ if $PROGRAM_NAME == __FILE__
            #####
         end
       end
+  
+      users = 'http://138.68.173.185/cryptochat/product/users.php'
+      response = RestClient.get(users)
+      parsed_users = JSON.parse(response)
+
+      puts parsed_users["records"][14]["login"]
+
 
       # Use Timer for "multi-threading"
       # Zastąpić to potem wątkami!!!
