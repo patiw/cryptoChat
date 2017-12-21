@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # Test of Qt-lib
 
 # Requested gems and files
@@ -19,6 +21,7 @@
 if $PROGRAM_NAME == __FILE__
 
   # QtApp patch for cryptoChat satisfy
+
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()'
@@ -48,12 +51,6 @@ if $PROGRAM_NAME == __FILE__
            #####
         end
       end
-  
-      users = 'http://138.68.173.185/cryptochat/product/users.php'
-      response = RestClient.get(users)
-      parsed_users = JSON.parse(response)
-
-      puts parsed_users["records"][14]["login"]
 
 
       # Use Timer for "multi-threading"
