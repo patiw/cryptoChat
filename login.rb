@@ -66,6 +66,7 @@ end
 
     @loginEdit = Qt::LineEdit.new self
     @passwd = Qt::LineEdit.new self
+    @passwd.setEchoMode(2)
 
     @loginEdit.resize 250, 30
     @loginEdit.move 170, 350
