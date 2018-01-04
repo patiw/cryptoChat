@@ -18,3 +18,10 @@ CREATE TABLE chatContacts(
 	name VARCHAR NOT NULL,
 	serverID VARCHAR NOT NULL
 	);
+
+CREATE TABLE convKeys(
+    id SERIAL PRIMARY KEY NOT NULL,
+    conversation_id INT NOT NULL,
+    key_one VARCHAR NOT NULL,
+    key_two VARCHAR NOT NULL
+    );
