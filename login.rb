@@ -6,7 +6,7 @@
 
 class QtApp < Qt::Widget
 
-  slots 'zaloguj()'
+  slots 'zaloguj()', 'signup()'
 
     def initialize
         super
@@ -27,15 +27,20 @@ end
   def init_ui
 
     loginButt = Qt::PushButton.new "Login", self
+    signupButt = Qt::PushButton.new "Sign Up", self
     quitButt = Qt::PushButton.new "Wyjdz", self
 
     loginButt.resize 80, 30
     loginButt.move 200, 500
 
+    signupButt.resize 80, 30
+    signupButt.move 250, 200
+
     quitButt.resize 80, 30
     quitButt.move 300, 500
 
     connect(loginButt, SIGNAL('clicked()'), self, SLOT('zaloguj()'))
+    connect(signupButt, SIGNAL('clicked()'), self, SLOT('signup()'))
     connect(quitButt, SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
     loginLabel = Qt::Label.new 'Login: ', self
@@ -49,6 +54,11 @@ end
                              max-height:30px;
                              min-width:27px;
                              min-height:27px;")
+
+    funnyLabel = Qt::Label.new 'Still not having an account?', self
+    funnyLabel.setFont Qt::Font.new "Impact", 20
+    funnyLabel.setStyleSheet("background-color: green;")
+
     passwdLabel = Qt::Label.new 'Password: ', self
     passwdLabel.setFont Qt::Font.new "Impact", 11
     passwdLabel.setStyleSheet("background-color: #009A80;
@@ -62,6 +72,7 @@ end
                              min-height:27px;")
 
     loginLabel.move 100, 350
+    funnyLabel.move 100, 150
     passwdLabel.move 70, 400
 
     @loginEdit = Qt::LineEdit.new self
@@ -107,7 +118,32 @@ end
       system('./cryptoChat.rb')
       exit
     else
-        Qt::MessageBox.about self, 'About', 'Wrong login and/or password. Try again.'
+        Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'
+    end
+  end
+
+  def signup
+
+    # made two separated windows for register, will change in future
+    one = Qt::InputDialog.getText self, "Sign Up",
+        "Enter your login"
+    # cosmetic things
+        if one == nil
+          one = 0
+        end
+    two = Qt::InputDialog.getText self, "Sign Up",
+        "Enter your password"
+    # just cosmetic
+        if two == nil
+          two = 0
+        end
+
+    if(one == 0 || two == 0)
+      Qt::MessageBox.about self, 'Trouble!', 'Didnt get your login and/or password. Try again.'
+    else
+      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{one}&password=#{two}"
+      RestClient.post(url, " ")
+      Qt::MessageBox.about self, 'Nice one!', 'Thanks for signing up!'
     end
   end
 
