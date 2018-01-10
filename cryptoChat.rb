@@ -24,7 +24,7 @@ if $PROGRAM_NAME == __FILE__
 
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
-    slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()'
+    slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()', 'proba(int, int)', 'exportcontacts()', 'addcontact()'
 
     def initialize
       super
@@ -68,8 +68,6 @@ if $PROGRAM_NAME == __FILE__
 
       setWindowTitle 'cryptoChat'
 
-      setToolTip 'cryptoChat'
-
       init_ui
 
       setFixedSize(560, 600)
@@ -80,6 +78,9 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def init_ui
+      users = 'http://138.68.173.185/cryptochat/product/users.php'
+      response = RestClient.get(users)
+
       hel = Qt::Action.new '&Help', self
       clr = Qt::Action.new '&Delete current chat history', self
       quit = Qt::Action.new '&Quit', self
@@ -171,6 +172,8 @@ if $PROGRAM_NAME == __FILE__
       connect(clr, SIGNAL('triggered()'), self, SLOT('clearHistory()'))
       connect(quit, SIGNAL('triggered()'),
               Qt::Application.instance, SLOT('quit()'))
+      connect(exp, SIGNAL('triggered()'), self, SLOT('exportcontacts()'))
+      connect(dod, SIGNAL('triggered()'), self, SLOT('addcontact()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -236,7 +239,7 @@ if $PROGRAM_NAME == __FILE__
                                min-height:30px;")
 
       @edit = Qt::TextEdit.new self
-      @edit.setEnabled true
+      @edit.setEnabled false
 
       hbox1.addWidget @edit
       @edit.resize 360, 400
@@ -256,31 +259,36 @@ if $PROGRAM_NAME == __FILE__
       connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
       connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sendText()'))
 
-      table = Qt::TableWidget.new self
-
-
       vbox1.addWidget label
       label.resize 84, 50
       label.move 390, 10
 
-      table.setWindowTitle("Example")
-      table.resize(150, 510)
-      table.move(390, 40)
-      table.setRowCount(4)
-      table.setColumnCount(1)
-      table.verticalHeader.hide
-      table.horizontalHeader.hide
+      @table = Qt::TableWidget.new self
 
-      table.setItem(0,0, Qt::TableWidgetItem.new("Chuj"))
-      table.setItem(1,0, Qt::TableWidgetItem.new("Dupa"))
-      table.setItem(2,0, Qt::TableWidgetItem.new("Kurwa"))
-      table.setItem(3,0, Qt::TableWidgetItem.new("Cipa"))
-      vbox1.addWidget table
+      @parsed_users = JSON.parse(response)
 
-      table.setStyleSheet("background-color: #D9FFF8;
+      x = @parsed_users["records"].length
+
+      @table.resize(150, 510)
+      @table.move(390, 40)
+      @table.setRowCount(x)
+      @table.setColumnCount(1)
+      @table.verticalHeader.hide
+      @table.horizontalHeader.hide
+      @table.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
+
+      (0...x).each do |i|
+          @table.setItem(i,0, Qt::TableWidgetItem.new("#{@parsed_users["records"][i]["login"]}"))
+      end
+
+      vbox1.addWidget @table
+
+      @table.setStyleSheet("background-color: #D9FFF8;
                                 border-style: solid;
                                 border-width:3px;
                                 border-color: #D9FFF8;")
+
+      connect(@table, SIGNAL('cellDoubleClicked(int, int)'), self, SLOT('proba(int, int)'))
     end
 
     def about
@@ -297,6 +305,28 @@ if $PROGRAM_NAME == __FILE__
 
     def sendText
       Message::sendTextBox(@edit2,'message')
+    end
+
+    def proba(x, y)
+      Qt::MessageBox.about self, 'Testowanie', "Tutaj bedzie otwieranie rozmowy z #{@table.item(x, y).text()}"
+    end
+
+    def exportcontacts
+      x = @parsed_users["records"].length
+      kontakty = File.open('contacts.txt', 'w')
+      (0...x).each do |i|
+           kontakty.write("#{@parsed_users["records"][i]["login"]}\n")
+      end
+      kontakty.close
+      Qt::MessageBox.about self, 'Export!', "Contacts exported to contacts.txt!"
+    end
+
+    def addcontact
+      login = Qt::InputDialog.getText self, "Adding a Contact",
+          "Enter a name: "
+      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{login}&password=test"
+      RestClient.post(url, " ")
+      Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
     end
   end
 
