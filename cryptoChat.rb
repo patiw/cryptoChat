@@ -256,16 +256,28 @@ if $PROGRAM_NAME == __FILE__
       connect(clearButt, SIGNAL('clicked()'), @edit2, SLOT('clear()'))
       connect(@sendButt, SIGNAL('clicked()'), self, SLOT('sendText()'))
 
-      @contacts = Qt::ListView.new self
+      table = Qt::TableWidget.new self
+
 
       vbox1.addWidget label
       label.resize 84, 50
       label.move 390, 10
 
-      vbox1.addWidget @contacts
-      @contacts.resize 150, 510
-      @contacts.move 390, 40
-      @contacts.setStyleSheet("background-color: #D9FFF8;
+      table.setWindowTitle("Example")
+      table.resize(150, 510)
+      table.move(390, 40)
+      table.setRowCount(4)
+      table.setColumnCount(1)
+      table.verticalHeader.hide
+      table.horizontalHeader.hide
+
+      table.setItem(0,0, Qt::TableWidgetItem.new("Chuj"))
+      table.setItem(1,0, Qt::TableWidgetItem.new("Dupa"))
+      table.setItem(2,0, Qt::TableWidgetItem.new("Kurwa"))
+      table.setItem(3,0, Qt::TableWidgetItem.new("Cipa"))
+      vbox1.addWidget table
+
+      table.setStyleSheet("background-color: #D9FFF8;
                                 border-style: solid;
                                 border-width:3px;
                                 border-color: #D9FFF8;")
@@ -287,6 +299,7 @@ if $PROGRAM_NAME == __FILE__
       Message::sendTextBox(@edit2,'message')
     end
   end
+
     ####################################################
     #TO DELETE LATER
     Message::checkIfFileExist
