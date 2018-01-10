@@ -25,3 +25,9 @@ CREATE TABLE convKeys(
     key_one VARCHAR NOT NULL,
     key_two VARCHAR NOT NULL
     );
+
+CREATE TABLE conversations(
+	id SERIAL PRIMARY KEY NOT NULL,
+	user1 VARCHAR NOT NULL,
+	user2 VARCHAR NOT NULL
+	);
