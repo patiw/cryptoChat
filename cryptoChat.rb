@@ -24,7 +24,8 @@ if $PROGRAM_NAME == __FILE__
 
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
-    slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()', 'proba(int, int)', 'exportcontacts()', 'addcontact()'
+    slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
+          'proba(int, int)', 'exportcontacts()', 'addcontact()' # , 'removecontact()'
 
     def initialize
       super
@@ -80,6 +81,7 @@ if $PROGRAM_NAME == __FILE__
     def init_ui
       users = 'http://138.68.173.185/cryptochat/product/users.php'
       response = RestClient.get(users)
+      @parsed_users = JSON.parse(response)
 
       hel = Qt::Action.new '&Help', self
       clr = Qt::Action.new '&Delete current chat history', self
@@ -174,6 +176,7 @@ if $PROGRAM_NAME == __FILE__
               Qt::Application.instance, SLOT('quit()'))
       connect(exp, SIGNAL('triggered()'), self, SLOT('exportcontacts()'))
       connect(dod, SIGNAL('triggered()'), self, SLOT('addcontact()'))
+      # connect(usu, SIGNAL('triggered()'), self, SLOT('removecontact()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -322,11 +325,19 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def exportcontacts
-      x = @parsed_users["records"].length
-      kontakty = File.open('contacts.txt', 'w')
-      (0...x).each do |i|
-           kontakty.write("#{@parsed_users["records"][i]["login"]}\n")
-      end
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+        kont = db.exec("SELECT * FROM chatcontacts")
+
+        kontakty = File.open('contacts.txt', 'w')
+
+        kont.each do |row|
+          kontakty.write("#{row['name']};#{row['serverid']}\n")
+        end
+      db.close
       kontakty.close
       Qt::MessageBox.about self, 'Export!', "Contacts exported to contacts.txt!"
     end
