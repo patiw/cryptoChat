@@ -265,9 +265,15 @@ if $PROGRAM_NAME == __FILE__
 
       @table = Qt::TableWidget.new self
 
-      @parsed_users = JSON.parse(response)
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+        kont = db.exec("SELECT * FROM chatcontacts")
 
-      x = @parsed_users["records"].length
+      # cmd_tuples returns number of rows affected by sql query
+      x = kont.cmdtuples
 
       @table.resize(150, 510)
       @table.move(390, 40)
@@ -277,15 +283,19 @@ if $PROGRAM_NAME == __FILE__
       @table.horizontalHeader.hide
       @table.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
 
-      (0...x).each do |i|
-          @table.setItem(i,0, Qt::TableWidgetItem.new("#{@parsed_users["records"][i]["login"]}"))
-      end
+      # magic trick to iteration over each row in table
+      i = -1
+
+        kont.each do |row|
+          @table.setItem(i+=1 , 0, Qt::TableWidgetItem.new("#{row['name']}"))
+        end
+      db.close
 
       vbox1.addWidget @table
 
       @table.setStyleSheet("background-color: #D9FFF8;
-                                border-style: solid;
-                                border-width:3px;
+                                border-style: none;
+                                border-width:0px;
                                 border-color: #D9FFF8;")
 
       connect(@table, SIGNAL('cellDoubleClicked(int, int)'), self, SLOT('proba(int, int)'))
@@ -322,11 +332,30 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def addcontact
+      counter = 0
+      x = @parsed_users["records"].length
       login = Qt::InputDialog.getText self, "Adding a Contact",
           "Enter a name: "
-      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{login}&password=test"
-      RestClient.post(url, " ")
-      Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
+      serverid = Qt::InputDialog.getText self, "Adding a Contact",
+          "Enter a serverID: "
+
+        (0...x).each do |i|
+            if(@parsed_users["records"][i]["serverID"] == serverid)
+              counter = 1
+            end
+        end
+        if counter == 1
+        db = PG.connect(
+          dbname: 'cryptochat',
+          user: 'cryptochat',
+          password: 'haslo'
+        )
+          db.exec("INSERT INTO chatcontacts(name, serverid) VALUES ($1, $2)", [login, serverid])
+        db.close
+        Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
+        else
+          Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
+        end
     end
   end
 
