@@ -25,7 +25,7 @@ if $PROGRAM_NAME == __FILE__
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
-          'proba(int, int)', 'exportcontacts()', 'addcontact()' # , 'removecontact()'
+          'proba(int, int)', 'exportcontacts()', 'addcontact()', 'importcontacts()'
 
     def initialize
       super
@@ -176,7 +176,7 @@ if $PROGRAM_NAME == __FILE__
               Qt::Application.instance, SLOT('quit()'))
       connect(exp, SIGNAL('triggered()'), self, SLOT('exportcontacts()'))
       connect(dod, SIGNAL('triggered()'), self, SLOT('addcontact()'))
-      # connect(usu, SIGNAL('triggered()'), self, SLOT('removecontact()'))
+      connect(imp, SIGNAL('triggered()'), self, SLOT('importcontacts()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -335,11 +335,36 @@ if $PROGRAM_NAME == __FILE__
         kontakty = File.open('contacts.txt', 'w')
 
         kont.each do |row|
-          kontakty.write("#{row['name']};#{row['serverid']}\n")
+          kontakty.write("#{row['name']} #{row['serverid']}\n")
         end
       db.close
       kontakty.close
       Qt::MessageBox.about self, 'Export!', "Contacts exported to contacts.txt!"
+    end
+
+    def importcontacts
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+        kont = db.exec("SELECT * FROM chatcontacts")
+
+        name = Qt::FileDialog::getOpenFileName self, 'Choose a file', '/home'
+
+        nazwa = Qt::FileInfo.new(name)
+        plik = nazwa.fileName
+
+        kontakty = File.open(plik, 'r')
+
+        while (line = kontakty.gets)
+          cos = line.split
+          db.exec("INSERT INTO chatcontacts(name, serverid) VALUES($1, $2)", [cos[0], cos[1]])
+        end
+
+      db.close
+      kontakty.close
+      Qt::MessageBox.about self, 'Import!', "Contacts imported from #{plik}!"
     end
 
     def addcontact
