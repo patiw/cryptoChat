@@ -25,7 +25,8 @@ if $PROGRAM_NAME == __FILE__
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
-          'proba(int, int)', 'exportcontacts()', 'addcontact()', 'importcontacts()'
+          'proba(int, int)', 'exportcontacts()', 'addcontact()', \
+          'importcontacts()', 'deletecontact()'
 
     def initialize
       super
@@ -177,6 +178,7 @@ if $PROGRAM_NAME == __FILE__
       connect(exp, SIGNAL('triggered()'), self, SLOT('exportcontacts()'))
       connect(dod, SIGNAL('triggered()'), self, SLOT('addcontact()'))
       connect(imp, SIGNAL('triggered()'), self, SLOT('importcontacts()'))
+      connect(usu, SIGNAL('triggered()'), self, SLOT('deletecontact()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -348,8 +350,6 @@ if $PROGRAM_NAME == __FILE__
         user: 'cryptochat',
         password: 'haslo'
       )
-        kont = db.exec("SELECT * FROM chatcontacts")
-
         name = Qt::FileDialog::getOpenFileName self, 'Choose a file', '/home'
 
         nazwa = Qt::FileInfo.new(name)
@@ -392,6 +392,33 @@ if $PROGRAM_NAME == __FILE__
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
         end
+    end
+
+    def deletecontact
+      counter = 0
+      login = Qt::InputDialog.getText self, "Adding a Contact",
+          "Enter a name: "
+      serverid = Qt::InputDialog.getText self, "Adding a Contact",
+          "Enter a serverID: "
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+      kont = db.exec("SELECT * FROM chatcontacts")
+
+      kont.each do |row|
+        if("#{row['name']}" == login and "#{row['serverid']}" == serverid)
+          counter = 1
+        end
+      end
+        if counter == 1
+          db.exec("DELETE FROM chatcontacts WHERE name=$1 AND serverid=$2", [login, serverid])
+          Qt::MessageBox.about self, 'Deleted!', "Deleted contact #{login}!"
+        else
+          Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
+        end
+      db.close
     end
   end
 
