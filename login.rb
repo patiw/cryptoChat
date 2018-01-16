@@ -117,7 +117,7 @@ end
 
     if counter == 1
       start_string = './cryptoChat.rb ' << @response_serverid
-      system(start_string)
+      exec(start_string)
       exit
     else
         Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'
