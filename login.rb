@@ -111,11 +111,13 @@ end
     (0...x).each do |i|
       if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == password)
         counter = 1
+        @response_serverid = parsed_users["records"][i]["serverID"]
       end
     end
 
     if counter == 1
-      system('./cryptoChat.rb')
+      start_string = './cryptoChat.rb ' << @response_serverid
+      system(start_string)
       exit
     else
         Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'

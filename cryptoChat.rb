@@ -20,6 +20,10 @@
 # "main"
 if $PROGRAM_NAME == __FILE__
 
+  # Getting serverID from argument of starting program << login.rb system call
+  $serverid = ARGV[0]
+  # puts $serverid
+
   # QtApp patch for cryptoChat satisfy
 
   class QtApp < Qt::MainWindow
