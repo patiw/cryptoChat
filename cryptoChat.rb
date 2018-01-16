@@ -26,7 +26,7 @@ if $PROGRAM_NAME == __FILE__
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
           'proba(int, int)', 'exportcontacts()', 'addcontact()', \
-          'importcontacts()', 'deletecontact()'
+          'importcontacts()', 'deletecontact()', 'importmessages()'
 
     def initialize
       super
@@ -268,6 +268,12 @@ if $PROGRAM_NAME == __FILE__
       label.resize 84, 50
       label.move 390, 10
 
+      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
+      responsea = RestClient.get(urliu)
+      mestab = JSON.parse(responsea)
+
+      puts mestab['messages'].length
+
       @table = Qt::TableWidget.new self
 
       db = PG.connect(
@@ -418,6 +424,26 @@ if $PROGRAM_NAME == __FILE__
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
         end
+      db.close
+    end
+
+    # to musi byc user1, user2, userID musi byc wysylany
+    def importmessages
+      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
+      responsea = RestClient.get(urliu)
+      mestab = JSON.parse(responsea)
+
+      x = mestab['messages'].length
+      puts mestab['messages'][x]['date']
+
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+      (0..x).each do |i|
+        db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
+      end
       db.close
     end
   end
