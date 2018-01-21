@@ -459,7 +459,11 @@ if $PROGRAM_NAME == __FILE__
       responsea = RestClient.get(urliu)
       mestab = JSON.parse(responsea)
 
-      x = mestab['messages'].length
+      if mestab['messages'] != nil
+        x = mestab['messages'].length
+      else
+        x = 0
+      end
       puts x
 
       db = PG.connect(
