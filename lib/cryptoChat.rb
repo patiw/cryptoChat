@@ -30,7 +30,7 @@ if $PROGRAM_NAME == __FILE__
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
           'proba(int, int)', 'exportcontacts()', 'addcontact()', \
-          'importcontacts()', 'deletecontact()', 'importmessages()'
+          'importcontacts()', 'deletecontact()', 'importmessages()', 'showserverid()'
 
     def initialize
       super
@@ -94,6 +94,7 @@ if $PROGRAM_NAME == __FILE__
       quit.setShortcut 'Esc'
       hel.setShortcut 'Ctrl+H'
       clr.setShortcut 'Ctrl+Delete'
+      serID = Qt::Action.new '&Show me my serverID', self
       dod = Qt::Action.new '&Add new contact', self
       usu = Qt::Action.new '&Delete a contact', self
       imp = Qt::Action.new '&Import contacts from file', self
@@ -149,6 +150,7 @@ if $PROGRAM_NAME == __FILE__
       @menuKont = Qt::Menu.new(@menuBar)
       @menuKont.setObjectName('menuKont')
       @menuKont.setTitle('Account')
+      @menuKont.addAction serID
       @menuKont.addAction dod
       @menuKont.addAction usu
       @menuKont.addAction imp
@@ -183,6 +185,7 @@ if $PROGRAM_NAME == __FILE__
       connect(dod, SIGNAL('triggered()'), self, SLOT('addcontact()'))
       connect(imp, SIGNAL('triggered()'), self, SLOT('importcontacts()'))
       connect(usu, SIGNAL('triggered()'), self, SLOT('deletecontact()'))
+      connect(serID, SIGNAL('triggered()'), self, SLOT('showserverid()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -273,26 +276,34 @@ if $PROGRAM_NAME == __FILE__
         password: 'haslo'
       )
         kont = db.exec("SELECT * FROM chatcontacts")
-        # wiad = db.exec("SELECT * FROM chatmessages")
+        wiad = db.exec("SELECT * FROM chatmessages")
 
       # cmd_tuples returns number of rows affected by sql query
       x = kont.cmdtuples
-      # y = wiad.cmdtuples
+      @y = wiad.cmdtuples
+
+      puts @y
 
       @table2.resize(360, 400)
       @table2.move(20, 40)
-      @table2.setRowCount(7)
+      @table2.setRowCount(@y)
       @table2.setColumnCount(2)
       @table2.verticalHeader.hide
-      @table2.horizontalHeader.setDefaultSectionSize(180)
+      @table2.horizontalHeader.setDefaultSectionSize(170)
       @table2.horizontalHeader.setResizeMode(Qt::HeaderView::Fixed)
       @table2.horizontalHeader.hide
       @table2.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
+      @table2.setWordWrap(true)
+      @table2.setShowGrid(false)
+      # @table2.setTextElideMode(Qt::ElideMiddle)
+      # @table2.horizontalHeader.setResizeMode(Qt::HeaderView::ResizeToContents)
+      # @table2.verticalHeader.setResizeMode(Qt::HeaderView::ResizeToContents)
 
       @table.resize(150, 510)
       @table.move(390, 40)
       @table.setRowCount(x)
       @table.setColumnCount(1)
+      @table.horizontalHeader.setDefaultSectionSize(150)
       @table.verticalHeader.hide
       @table.horizontalHeader.hide
       @table.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
@@ -327,15 +338,19 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def clearHistory
-      Message::deleteContent(@edit, 'message')
+      Message::deleteContent(@table2, 'message')
     end
 
     def refreshText
       Message::refreshTextBox(@table2)
+      @table2.resizeRowsToContents
+      # @table2.verticalHeader.setResizeMode(Qt::HeaderView::Stretch)
     end
 
     def sendText
-      Message::sendTextBox(@edit2,'message')
+      Message::sendTextBox(@edit2, @table2)
+      @edit2.clear
+      @table2.insertRow(@table2.rowCount)
     end
 
     def proba(x, y)
@@ -456,6 +471,11 @@ if $PROGRAM_NAME == __FILE__
       end
       db.close
     end
+
+    def showserverid
+      Qt::MessageBox.about self, 'My ServerID', "ServerID: #{$serverid}"
+    end
+
   end
 
     ####################################################

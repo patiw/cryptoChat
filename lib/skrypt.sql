@@ -7,8 +7,8 @@ CREATE TABLE chatUser(
 
 CREATE TABLE chatMessages(
 	id SERIAL PRIMARY KEY NOT NULL,
-	sender INT NOT NULL,
-	receiver INT NOT NULL,
+	sender VARCHAR NOT NULL,
+	receiver VARCHAR NOT NULL,
 	date TIMESTAMP,
 	text TEXT
 	);
