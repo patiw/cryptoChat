@@ -30,7 +30,7 @@ if $PROGRAM_NAME == __FILE__
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
           'proba(int, int)', 'exportcontacts()', 'addcontact()', \
-          'importcontacts()', 'deletecontact()'
+          'importcontacts()', 'deletecontact()', 'importmessages()'
 
     def initialize
       super
@@ -190,42 +190,30 @@ if $PROGRAM_NAME == __FILE__
       hbox2 = Qt::HBoxLayout.new
       # hbox3 = Qt::HBoxLayout.new
 
+      buttonStyle = "QPushButton {
+                      background-color: #009A80;
+                      border-style: solid;
+                      border-width:1px;
+                      border-radius:10px;
+                      border-color: #D9FFF8;
+                      max-width:100px;
+                      max-height:50px;
+                      min-width:30px;
+                      min-height:30px;
+                     }
+                     QPushButton:pressed {
+                      background-color: #004E40;
+                      color: yellow;
+                     }"
+
       # vbox1.addWidget about
       clearButt = Qt::PushButton.new "Clear", self
       clearButt.setFont Qt::Font.new "Impact", 12
-      clearButt.setStyleSheet("QPushButton {
-                                 background-color: #009A80;
-                                 border-style: solid;
-                                 border-width:1px;
-                                 border-radius:10px;
-                                 border-color: #D9FFF8;
-                                 max-width:100px;
-                                 max-height:50px;
-                                 min-width:30px;
-                                 min-height:30px;
-                               }
-                               QPushButton:pressed {
-                                background-color: #004E40;
-                                color: yellow;
-                               }")
+      clearButt.setStyleSheet(buttonStyle)
 
       @sendButt = Qt::PushButton.new "Send", self
       @sendButt.setFont Qt::Font.new "Impact", 12
-      @sendButt.setStyleSheet("QPushButton {
-                                 background-color: #009A80;
-                                 border-style: solid;
-                                 border-width:1px;
-                                 border-radius:10px;
-                                 border-color: #D9FFF8;
-                                 max-width:100px;
-                                 max-height:50px;
-                                 min-width:30px;
-                                 min-height:30px;
-                               }
-                               QPushButton:pressed {
-                                background-color: #004E40;
-                                color: yellow;
-                               }")
+      @sendButt.setStyleSheet(buttonStyle)
 
       # @sendButt.pressed::setStyleSheet("color: yellow;")
 
@@ -271,6 +259,12 @@ if $PROGRAM_NAME == __FILE__
       vbox1.addWidget label
       label.resize 84, 50
       label.move 390, 10
+
+      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
+      responsea = RestClient.get(urliu)
+      mestab = JSON.parse(responsea)
+
+      puts mestab['messages'].length
 
       @table = Qt::TableWidget.new self
 
@@ -422,6 +416,26 @@ if $PROGRAM_NAME == __FILE__
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
         end
+      db.close
+    end
+
+    # to musi byc user1, user2, userID musi byc wysylany
+    def importmessages
+      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
+      responsea = RestClient.get(urliu)
+      mestab = JSON.parse(responsea)
+
+      x = mestab['messages'].length
+      puts mestab['messages'][x]['date']
+
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+      (0..x).each do |i|
+        db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
+      end
       db.close
     end
   end
