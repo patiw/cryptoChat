@@ -1,9 +1,9 @@
-before_install: 
+before_install:
   - "gem update --system"
   - "gem --version"
   - "gem install bundler"
   - "sudo apt-get install qt4-default"
-language: ruby
-rvm: 
-  - 2.2
 
+language: ruby
+rvm:
+  - 2.2

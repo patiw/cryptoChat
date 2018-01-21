@@ -20,6 +20,10 @@
 # "main"
 if $PROGRAM_NAME == __FILE__
 
+  # Getting serverID from argument of starting program << login.rb system call
+  $serverid = ARGV[0]
+  # puts $serverid
+
   # QtApp patch for cryptoChat satisfy
 
   class QtApp < Qt::MainWindow
@@ -186,42 +190,30 @@ if $PROGRAM_NAME == __FILE__
       hbox2 = Qt::HBoxLayout.new
       # hbox3 = Qt::HBoxLayout.new
 
+      buttonStyle = "QPushButton {
+                      background-color: #009A80;
+                      border-style: solid;
+                      border-width:1px;
+                      border-radius:10px;
+                      border-color: #D9FFF8;
+                      max-width:100px;
+                      max-height:50px;
+                      min-width:30px;
+                      min-height:30px;
+                     }
+                     QPushButton:pressed {
+                      background-color: #004E40;
+                      color: yellow;
+                     }"
+
       # vbox1.addWidget about
       clearButt = Qt::PushButton.new "Clear", self
       clearButt.setFont Qt::Font.new "Impact", 12
-      clearButt.setStyleSheet("QPushButton {
-                                 background-color: #009A80;
-                                 border-style: solid;
-                                 border-width:1px;
-                                 border-radius:10px;
-                                 border-color: #D9FFF8;
-                                 max-width:100px;
-                                 max-height:50px;
-                                 min-width:30px;
-                                 min-height:30px;
-                               }
-                               QPushButton:pressed {
-                                background-color: #004E40;
-                                color: yellow;
-                               }")
+      clearButt.setStyleSheet(buttonStyle)
 
       @sendButt = Qt::PushButton.new "Send", self
       @sendButt.setFont Qt::Font.new "Impact", 12
-      @sendButt.setStyleSheet("QPushButton {
-                                 background-color: #009A80;
-                                 border-style: solid;
-                                 border-width:1px;
-                                 border-radius:10px;
-                                 border-color: #D9FFF8;
-                                 max-width:100px;
-                                 max-height:50px;
-                                 min-width:30px;
-                                 min-height:30px;
-                               }
-                               QPushButton:pressed {
-                                background-color: #004E40;
-                                color: yellow;
-                               }")
+      @sendButt.setStyleSheet(buttonStyle)
 
       # @sendButt.pressed::setStyleSheet("color: yellow;")
 
@@ -246,7 +238,7 @@ if $PROGRAM_NAME == __FILE__
       @edit = Qt::TextEdit.new self
       @edit.setEnabled false
 
-      hbox1.addWidget @edit
+      # hbox1.addWidget @edit
       @edit.resize 360, 400
       @edit.move 20, 40
       @edit.setFont Qt::Font.new "Impact", 11
@@ -272,9 +264,8 @@ if $PROGRAM_NAME == __FILE__
       responsea = RestClient.get(urliu)
       mestab = JSON.parse(responsea)
 
-      puts mestab['messages'].length
-
       @table = Qt::TableWidget.new self
+      @table2 = Qt::TableWidget.new self
 
       db = PG.connect(
         dbname: 'cryptochat',
@@ -282,9 +273,21 @@ if $PROGRAM_NAME == __FILE__
         password: 'haslo'
       )
         kont = db.exec("SELECT * FROM chatcontacts")
+        # wiad = db.exec("SELECT * FROM chatmessages")
 
       # cmd_tuples returns number of rows affected by sql query
       x = kont.cmdtuples
+      # y = wiad.cmdtuples
+
+      @table2.resize(360, 400)
+      @table2.move(20, 40)
+      @table2.setRowCount(7)
+      @table2.setColumnCount(2)
+      @table2.verticalHeader.hide
+      @table2.horizontalHeader.setDefaultSectionSize(180)
+      @table2.horizontalHeader.setResizeMode(Qt::HeaderView::Fixed)
+      @table2.horizontalHeader.hide
+      @table2.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
 
       @table.resize(150, 510)
       @table.move(390, 40)
@@ -304,7 +307,14 @@ if $PROGRAM_NAME == __FILE__
 
       vbox1.addWidget @table
 
+      hbox1.addWidget @table2
+
       @table.setStyleSheet("background-color: #D9FFF8;
+                                border-style: none;
+                                border-width:0px;
+                                border-color: #D9FFF8;")
+
+      @table2.setStyleSheet("background-color: #D9FFF8;
                                 border-style: none;
                                 border-width:0px;
                                 border-color: #D9FFF8;")
@@ -321,7 +331,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def refreshText
-      Message::refreshTextBox(@edit)
+      Message::refreshTextBox(@table2)
     end
 
     def sendText
@@ -434,7 +444,7 @@ if $PROGRAM_NAME == __FILE__
       mestab = JSON.parse(responsea)
 
       x = mestab['messages'].length
-      puts mestab['messages'][x]['date']
+      puts mestab['messages'][x - 1]['date']
 
       db = PG.connect(
         dbname: 'cryptochat',

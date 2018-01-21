@@ -30,6 +30,31 @@ end
     signupButt = Qt::PushButton.new "Sign Up", self
     quitButt = Qt::PushButton.new "Wyjdz", self
 
+    buttonStyle = "QPushButton {
+                    background-color: #009A80;
+                    border-style: solid;
+                    border-width:1px;
+                    border-radius:10px;
+                    border-color: #D9FFF8;
+                    max-width:100px;
+                    max-height:50px;
+                    min-width:30px;
+                    min-height:30px;
+                   }
+                   QPushButton:pressed {
+                    background-color: #004E40;
+                    color: yellow;
+                   }"
+
+    loginButt.setFont Qt::Font.new "Impact", 12
+    loginButt.setStyleSheet(buttonStyle)
+
+    signupButt.setFont Qt::Font.new "Impact", 12
+    signupButt.setStyleSheet(buttonStyle)
+
+    quitButt.setFont Qt::Font.new "Impact", 12
+    quitButt.setStyleSheet(buttonStyle)
+
     loginButt.resize 80, 30
     loginButt.move 200, 500
 
@@ -43,33 +68,25 @@ end
     connect(signupButt, SIGNAL('clicked()'), self, SLOT('signup()'))
     connect(quitButt, SIGNAL('clicked()'), $qApp, SLOT('quit()'))
 
+    smallLabel = "background-color: none;
+                  color: #0C2917;
+                  max-width:100px;
+                  max-height:30px;
+                  min-width:27px;
+                  min-height:27px;"
+
     loginLabel = Qt::Label.new 'Login: ', self
     loginLabel.setFont Qt::Font.new "Impact", 11
-    loginLabel.setStyleSheet("background-color: #009A80;
-                             border-style: solid;
-                             border-width:1px;
-                             border-radius:3px;
-                             border-color: #D9FFF8;
-                             max-width:100px;
-                             max-height:30px;
-                             min-width:27px;
-                             min-height:27px;")
+    loginLabel.setStyleSheet(smallLabel)
 
     funnyLabel = Qt::Label.new 'Still not having an account?', self
     funnyLabel.setFont Qt::Font.new "Impact", 20
-    funnyLabel.setStyleSheet("background-color: green;")
+    funnyLabel.setStyleSheet("background-color: none;
+                              color: #0C2917")
 
     passwdLabel = Qt::Label.new 'Password: ', self
     passwdLabel.setFont Qt::Font.new "Impact", 11
-    passwdLabel.setStyleSheet("background-color: #009A80;
-                             border-style: solid;
-                             border-width:1px;
-                             border-radius:3px;
-                             border-color: #D9FFF8;
-                             max-width:100px;
-                             max-height:30px;
-                             min-width:27px;
-                             min-height:27px;")
+    passwdLabel.setStyleSheet(smallLabel)
 
     loginLabel.move 100, 350
     funnyLabel.move 100, 150
@@ -84,7 +101,6 @@ end
 
     @passwd.resize 250, 30
     @passwd.move 170, 400
-
   end
 
   def zaloguj
@@ -111,14 +127,16 @@ end
     (0...x).each do |i|
       if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == password)
         counter = 1
+        @response_serverid = parsed_users["records"][i]["serverID"]
       end
     end
 
     if counter == 1
-      system('./cryptoChat.rb')
+      start_string = './cryptoChat.rb ' << @response_serverid
+      exec(start_string)
       exit
     else
-        Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'
+      Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'
     end
   end
 
