@@ -213,7 +213,9 @@ class String
     # Since Ruby conversion makes it to the first used bit
     self.each_char{|c|
     # Little optimalization of the loop
-      if c.ord > 63
+      if c.ord > 127
+        bytearr << c.ord.to_s(2)
+      elsif c.ord > 63
         bytearr << "0" + c.ord.to_s(2)
       elsif c.ord > 31
         bytearr << "00" + c.ord.to_s(2)
