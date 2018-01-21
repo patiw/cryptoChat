@@ -22,6 +22,7 @@ if $PROGRAM_NAME == __FILE__
 
   # Getting serverID from argument of starting program << login.rb system call
   $serverid = ARGV[0]
+  $connectID = ''
   # puts $serverid
 
   # QtApp patch for cryptoChat satisfy
@@ -348,13 +349,13 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def sendText
-      Message::sendTextBox(@edit2, @table2)
-      @edit2.clear
-      @table2.insertRow(@table2.rowCount)
-    end
-
-    def proba(x, y)
-      Qt::MessageBox.about self, 'Testowanie', "Tutaj bedzie otwieranie rozmowy z #{@table.item(x, y).text()}"
+      if $connectID == ''
+        Qt::MessageBox.about self, 'Error', 'You dunno de wae'
+      else
+        Message::sendTextBox(@edit2, @table2)
+        @edit2.clear
+        @table2.insertRow(@table2.rowCount)
+      end
     end
 
     def exportcontacts
@@ -454,19 +455,21 @@ if $PROGRAM_NAME == __FILE__
 
     # to musi byc user1, user2, userID musi byc wysylany
     def importmessages
-      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
+      urliu = "http://138.68.173.185/cryptochat/product/messages.php?user1=#{$serverid}&user2=#{$connectID}"
       responsea = RestClient.get(urliu)
       mestab = JSON.parse(responsea)
 
       x = mestab['messages'].length
-      puts mestab['messages'][x - 1]['date']
+      puts x
 
       db = PG.connect(
         dbname: 'cryptochat',
         user: 'cryptochat',
         password: 'haslo'
       )
-      (0..x).each do |i|
+      db.exec("DELETE FROM chatmessages")
+      db.exec("ALTER SEQUENCE chatMessages_id_seq RESTART WITH 1")
+      (0...x).each do |i|
         db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
       end
       db.close
@@ -476,6 +479,20 @@ if $PROGRAM_NAME == __FILE__
       Qt::MessageBox.about self, 'My ServerID', "ServerID: #{$serverid}"
     end
 
+    def proba(x, y)
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+      connectIDserver = db.exec("SELECT serverid FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
+      $connectID = connectIDserver[0]['serverid']
+      db.close
+      importmessages
+      refreshText
+      # twoja nazwa | oryginalna | server id
+      Qt::MessageBox.about self, 'Testowanie', "Tutaj bedzie otwieranie rozmowy z #{@table.item(x, y).text()}"
+    end
   end
 
     ####################################################
