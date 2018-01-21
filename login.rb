@@ -133,7 +133,6 @@ end
 
     if counter == 1
       start_string = './cryptoChat.rb ' << @response_serverid
-
       exec(start_string)
       exit
     else
