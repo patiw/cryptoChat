@@ -23,7 +23,9 @@ if $PROGRAM_NAME == __FILE__
   # Getting serverID from argument of starting program << login.rb system call
   $serverid = ARGV[0]
   $connectID = ''
-  $last_message = [nil, nil, nil]
+  $last_message = ['', '', '1970-01-01 22:22:22']
+  $old_rows_count = 0
+  $new_rows_count = 0
   # puts $serverid
 
   # QtApp patch for cryptoChat satisfy
