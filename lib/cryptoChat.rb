@@ -71,7 +71,7 @@ if $PROGRAM_NAME == __FILE__
       # more and more timers executing different functions.
       @timer = Qt::Timer.new(self)
       connect(@timer, SIGNAL(:timeout), self, SLOT('refreshText()'))
-      @timer.start(500)
+      @timer.start(1000)
 
       setWindowTitle 'cryptoChat'
 
@@ -264,10 +264,6 @@ if $PROGRAM_NAME == __FILE__
       label.resize 84, 50
       label.move 390, 10
 
-      urliu = 'http://138.68.173.185/cryptochat/product/messages.php?user1=9&user2=9'
-      responsea = RestClient.get(urliu)
-      mestab = JSON.parse(responsea)
-
       @table = Qt::TableWidget.new self
       @table2 = Qt::TableWidget.new self
 
@@ -276,18 +272,15 @@ if $PROGRAM_NAME == __FILE__
         user: 'cryptochat',
         password: 'haslo'
       )
-        kont = db.exec("SELECT * FROM chatcontacts")
-        wiad = db.exec("SELECT * FROM chatmessages")
+      kont = db.exec("SELECT * FROM chatcontacts")
+      # wiad = db.exec("SELECT * FROM chatmessages")
 
       # cmd_tuples returns number of rows affected by sql query
       x = kont.cmdtuples
-      @y = wiad.cmdtuples
-
-      puts @y
 
       @table2.resize(360, 400)
       @table2.move(20, 40)
-      @table2.setRowCount(@y)
+      #@table2.setRowCount(@y)
       @table2.setColumnCount(2)
       @table2.verticalHeader.hide
       @table2.horizontalHeader.setDefaultSectionSize(170)
@@ -296,9 +289,6 @@ if $PROGRAM_NAME == __FILE__
       @table2.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
       @table2.setWordWrap(true)
       @table2.setShowGrid(false)
-      # @table2.setTextElideMode(Qt::ElideMiddle)
-      # @table2.horizontalHeader.setResizeMode(Qt::HeaderView::ResizeToContents)
-      # @table2.verticalHeader.setResizeMode(Qt::HeaderView::ResizeToContents)
 
       @table.resize(150, 510)
       @table.move(390, 40)
@@ -343,9 +333,9 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def refreshText
+      importmessages
       Message::refreshTextBox(@table2)
       @table2.resizeRowsToContents
-      # @table2.verticalHeader.setResizeMode(Qt::HeaderView::Stretch)
     end
 
     def sendText
@@ -430,8 +420,6 @@ if $PROGRAM_NAME == __FILE__
       counter = 0
       login = Qt::InputDialog.getText self, "Adding a Contact",
           "Enter a name: "
-      serverid = Qt::InputDialog.getText self, "Adding a Contact",
-          "Enter a serverID: "
       db = PG.connect(
         dbname: 'cryptochat',
         user: 'cryptochat',
@@ -440,12 +428,12 @@ if $PROGRAM_NAME == __FILE__
       kont = db.exec("SELECT * FROM chatcontacts")
 
       kont.each do |row|
-        if("#{row['name']}" == login and "#{row['serverid']}" == serverid)
+        if("#{row['name']}" == login)
           counter = 1
         end
       end
         if counter == 1
-          db.exec("DELETE FROM chatcontacts WHERE name=$1 AND serverid=$2", [login, serverid])
+          db.exec("DELETE FROM chatcontacts WHERE name=$1", [login])
           Qt::MessageBox.about self, 'Deleted!', "Deleted contact #{login}!"
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
@@ -464,7 +452,8 @@ if $PROGRAM_NAME == __FILE__
       else
         x = 0
       end
-      puts x
+
+      clearHistory
 
       db = PG.connect(
         dbname: 'cryptochat',
@@ -492,17 +481,10 @@ if $PROGRAM_NAME == __FILE__
       connectIDserver = db.exec("SELECT serverid FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
       $connectID = connectIDserver[0]['serverid']
       db.close
-      importmessages
-      refreshText
-      # twoja nazwa | oryginalna | server id
       Qt::MessageBox.about self, 'Testowanie', "Tutaj bedzie otwieranie rozmowy z #{@table.item(x, y).text()}"
     end
   end
 
-    ####################################################
-    #TO DELETE LATER
-    Message::checkIfFileExist
-    ####################################################
     app = Qt::Application.new ARGV
     QtApp.new
 
