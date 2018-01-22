@@ -94,7 +94,7 @@ if $PROGRAM_NAME == __FILE__
       @parsed_users = JSON.parse(response)
 
       hel = Qt::Action.new '&Help', self
-      clr = Qt::Action.new '&Delete current chat history', self
+      clr = Qt::Action.new '&Clear chat window', self
       quit = Qt::Action.new '&Quit', self
       quit.setShortcut 'Esc'
       hel.setShortcut 'Ctrl+H'
@@ -331,7 +331,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def clearHistory
-      Message::deleteContent(@table2, 'message')
+      Message::deleteContent(@table2)
     end
 
     def refreshText
@@ -482,20 +482,27 @@ if $PROGRAM_NAME == __FILE__
         x = 0
       end
 
-      if $connectID != $old_connect_ID
-        clearHistory
-        $old_connect_ID = $connectID
-      end
-
       db = PG.connect(
         dbname: 'cryptochat',
         user: 'cryptochat',
         password: 'haslo'
       )
-      db.exec("DELETE FROM chatmessages")
-      db.exec("ALTER SEQUENCE chatMessages_id_seq RESTART WITH 1")
-      (0...x).each do |i|
-        db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
+
+      if $connectID != $old_connect_ID
+        clearHistory
+        $old_connect_ID = $connectID
+        $last_message = ['', '', '1970-01-01 22:22:22']
+        db.exec("DELETE FROM chatmessages")
+        db.exec("ALTER SEQUENCE chatMessages_id_seq RESTART WITH 1")
+        (0...x).each do |i|
+          db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
+        end
+      else
+        max_tab = db.exec("SELECT max(id) from chatmessages")
+        max_id = (max_tab[0]['max']).to_i
+        (max_id...x).each do |i|
+          db.exec("INSERT INTO chatmessages(sender, receiver, text, date) VALUES($1, $2, $3, $4)", [mestab['messages'][i]['sender'], mestab['messages'][i]['receiver'], mestab['messages'][i]['text'], mestab['messages'][i]['date']])
+        end
       end
       db.close
     end
