@@ -34,7 +34,8 @@ if $PROGRAM_NAME == __FILE__
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
           'proba(int, int)', 'exportcontacts()', 'addcontact()', \
-          'importcontacts()', 'deletecontact()', 'importmessages()', 'showserverid()'
+          'importcontacts()', 'deletecontact()', 'importmessages()', 'showserverid()', \
+          'gen_new_key()', 'set_conv_key()', 'show_conv_key()'
 
     def initialize
       super
@@ -103,6 +104,9 @@ if $PROGRAM_NAME == __FILE__
       usu = Qt::Action.new '&Delete a contact', self
       imp = Qt::Action.new '&Import contacts from file', self
       exp = Qt::Action.new '&Export contacts to a file', self
+      generate_key = Qt::Action.new '&Generate new random key', self
+      set_new_key = Qt::Action.new '&Set new key for conversation', self
+      show_the_key = Qt::Action.new '&Show actual key', self
 
       @menuBar = Qt::MenuBar.new(self)
       @menuBar.setGeometry(Qt::Rect.new(0, 0, 800, 60))
@@ -126,13 +130,7 @@ if $PROGRAM_NAME == __FILE__
                                 border-bottom-color: transparent;
                               }")
 
-      @menuFile = Qt::Menu.new(@menuBar)
-      @menuFile.setObjectName('menuFile')
-      @menuFile.setTitle('File')
-      @menuFile.addAction(hel)
-      @menuFile.addAction(clr)
-      @menuFile.addAction(quit)
-      @menuFile.setStyleSheet("QMenu {
+      sub_menu_style = "QMenu {
                                 border-style: solid;
                                 border-width:1px;
                                 border-color: #D9FFF8;
@@ -149,7 +147,15 @@ if $PROGRAM_NAME == __FILE__
                                }
                                QMenu:item:pressed {
                                  color: #BFB600;
-                               }");
+                               }"
+
+      @menuFile = Qt::Menu.new(@menuBar)
+      @menuFile.setObjectName('menuFile')
+      @menuFile.setTitle('File')
+      @menuFile.addAction(hel)
+      @menuFile.addAction(clr)
+      @menuFile.addAction(quit)
+      @menuFile.setStyleSheet(sub_menu_style)
 
       @menuKont = Qt::Menu.new(@menuBar)
       @menuKont.setObjectName('menuKont')
@@ -159,27 +165,19 @@ if $PROGRAM_NAME == __FILE__
       @menuKont.addAction usu
       @menuKont.addAction imp
       @menuKont.addAction exp
-      @menuKont.setStyleSheet("QMenu {
-                                border-style: solid;
-                                border-width:1px;
-                                border-color: #D9FFF8;
-                               color: #D9FFF8;
-                               background-color:
-                               qlineargradient(x1: 0, y1:2, x2:0, y2:0,
-                               stop:0 lightgray, stop:1 #004E40);
-                               }
-                               QMenu:item:selected {
-                                 color: #FFF200;
-                                 background-color: #004E40;
-                                 padding: 0px 25px 2px 20px;
-                                 border: 1px solid transparent;
-                               }
-                               QMenu:item:pressed {
-                                 color: #BFB600;
-                               }");
+      @menuKont.setStyleSheet(sub_menu_style)
 
-      @menuBar.addAction(@menuFile.menuAction())
-      @menuBar.addAction(@menuKont.menuAction())
+      @menuKey = Qt::Menu.new(@menuBar)
+      @menuKey.setObjectName('menuKey')
+      @menuKey.setTitle('Keys')
+      @menuKey.addAction show_the_key
+      @menuKey.addAction set_new_key
+      @menuKey.addAction generate_key
+      @menuKey.setStyleSheet(sub_menu_style)
+
+      @menuBar.addAction(@menuFile.menuAction)
+      @menuBar.addAction(@menuKont.menuAction)
+      @menuBar.addAction(@menuKey.menuAction)
 
       connect(hel, SIGNAL('triggered()'), self, SLOT('about()'))
       connect(clr, SIGNAL('triggered()'), self, SLOT('clearHistory()'))
@@ -190,6 +188,9 @@ if $PROGRAM_NAME == __FILE__
       connect(imp, SIGNAL('triggered()'), self, SLOT('importcontacts()'))
       connect(usu, SIGNAL('triggered()'), self, SLOT('deletecontact()'))
       connect(serID, SIGNAL('triggered()'), self, SLOT('showserverid()'))
+      connect(generate_key, SIGNAL('triggered()'), self, SLOT('gen_new_key()'))
+      connect(set_new_key, SIGNAL('triggered()'), self, SLOT('set_conv_key()'))
+      connect(show_the_key, SIGNAL('triggered()'), self, SLOT('show_conv_key()'))
 
       # vbox  = Qt::VBoxLayout.new self
       vbox1 = Qt::VBoxLayout.new
@@ -413,9 +414,11 @@ if $PROGRAM_NAME == __FILE__
       counter = 0
       x = @parsed_users["records"].length
       login = Qt::InputDialog.getText self, "Adding a Contact",
-          "Enter a name: "
+          "Enter the name: "
       serverid = Qt::InputDialog.getText self, "Adding a Contact",
-          "Enter a serverID: "
+          "Enter the serverID: "
+      key_input = Qt::InputDialog.getText self, "Adding a Contact",
+          "Enter the key: "
 
         (0...x).each do |i|
             if(@parsed_users["records"][i]["serverID"] == serverid)
@@ -428,7 +431,8 @@ if $PROGRAM_NAME == __FILE__
           user: 'cryptochat',
           password: 'haslo'
         )
-          db.exec("INSERT INTO chatcontacts(name, serverid) VALUES ($1, $2)", [login, serverid])
+          db.exec("INSERT INTO chatcontacts(name, serverid, key) VALUES ($1, $2, $3)", \
+                  [login, serverid, key_input])
         db.close
         Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
         @table.insertRow(@table.rowCount)
@@ -440,7 +444,7 @@ if $PROGRAM_NAME == __FILE__
 
     def deletecontact
       counter = 0
-      login = Qt::InputDialog.getText self, "Adding a Contact",
+      login = Qt::InputDialog.getText self, "Delete a Contact",
           "Enter a name: "
       db = PG.connect(
         dbname: 'cryptochat',
@@ -500,6 +504,36 @@ if $PROGRAM_NAME == __FILE__
       Qt::MessageBox.about self, 'My ServerID', "ServerID: #{$serverid}"
     end
 
+    def gen_new_key
+      random_key = GenerateKey::genkey
+      Qt::MessageBox.about self, 'Generation', "Random key: \n#{random_key}"
+    end
+
+    def show_conv_key
+      Qt::MessageBox.about self, 'My key', "Key: \n#{$conv_key}"
+    end
+
+    def set_conv_key
+      new_key_input = Qt::InputDialog.getText self, "Setting new key",
+                      "Enter new key: "
+
+      if new_key_input.length == 79
+        db = PG.connect(
+          dbname: 'cryptochat',
+          user: 'cryptochat',
+          password: 'haslo'
+        )
+        db.exec("UPDATE chatcontacts SET key = '#{new_key_input}' WHERE serverid = '#{$connectID}'")
+
+        db.close
+        Qt::MessageBox.about self, 'Setting new key', "Done!"
+        $conv_key = new_key_input
+      else
+        Qt::MessageBox.about self, 'Oops!', "You entered the key in a wrong way!\n
+                                    Check the length of key or maybe you missed some spaces."
+      end
+    end
+
     def proba(x, y)
       db = PG.connect(
         dbname: 'cryptochat',
@@ -509,8 +543,9 @@ if $PROGRAM_NAME == __FILE__
       $old_connect_ID = $connectID
       connectIDserver = db.exec("SELECT serverid FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
       $connectID = connectIDserver[0]['serverid']
+      $conv_key = connectIDserver[0]['key']
       db.close
-      Qt::MessageBox.about self, 'Testowanie', "Tutaj bedzie otwieranie rozmowy z #{@table.item(x, y).text()}"
+      Qt::MessageBox.about self, 'cryptoChat', "Connected to #{@table.item(x, y).text()}"
     end
   end
 
