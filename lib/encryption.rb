@@ -291,9 +291,8 @@ end
 ##################################
 class Encryption
   #Initialize class with input
-  def initialize(message, key)
+  def initialize(message)
     @message = message
-    @key = key
   end
 
   # Shifting for making CnDn
@@ -350,7 +349,7 @@ class Encryption
 
   # Encrypt a 64-bit message with key
   def tripledes_encrypt
-    key = @key.to_bits
+    key = $conv_key.to_bits
     key_a, key_b = key.split  # Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
@@ -363,7 +362,7 @@ class Encryption
 
   # Decrypt a 64-bit message with key
   def tripledes_decrypt
-    key = @key.to_bits
+    key = $conv_key.to_bits
     key_a, key_b = key.split   # Splits the key in two keys
     keys_a = expand(key_a)
     keys_b = expand(key_b)
