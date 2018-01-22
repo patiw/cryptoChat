@@ -517,20 +517,23 @@ if $PROGRAM_NAME == __FILE__
       new_key_input = Qt::InputDialog.getText self, "Setting new key",
                       "Enter new key: "
 
-      if new_key_input.length == 79
-        db = PG.connect(
-          dbname: 'cryptochat',
-          user: 'cryptochat',
-          password: 'haslo'
-        )
-        db.exec("UPDATE chatcontacts SET key = '#{new_key_input}' WHERE serverid = '#{$connectID}'")
+      unless new_key_input.nil?
+        new_key_input = new_key_input.chomp
+        if new_key_input.length == 143
+          db = PG.connect(
+            dbname: 'cryptochat',
+            user: 'cryptochat',
+            password: 'haslo'
+          )
+          db.exec("UPDATE chatcontacts SET key = '#{new_key_input}' WHERE serverid = '#{$connectID}'")
 
-        db.close
-        Qt::MessageBox.about self, 'Setting new key', "Done!"
-        $conv_key = new_key_input
-      else
-        Qt::MessageBox.about self, 'Oops!', "You entered the key in a wrong way!\n
-                                    Check the length of key or maybe you missed some spaces."
+          db.close
+          Qt::MessageBox.about self, 'Setting new key', "Done!"
+          $conv_key = new_key_input
+        else
+          puts new_key_input.length
+          Qt::MessageBox.about self, 'Oops!', "You entered the key in a wrong way!\nCheck the length of key or maybe you missed some spaces."
+        end
       end
     end
 
