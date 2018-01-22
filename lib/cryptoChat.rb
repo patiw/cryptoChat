@@ -304,12 +304,9 @@ if $PROGRAM_NAME == __FILE__
       @table.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
 
       # magic trick to iteration over each row in table
-      i = -1
-
-        kont.each do |row|
-          @table.setItem(i+=1 , 0, Qt::TableWidgetItem.new("#{row['name']}"))
-        end
       db.close
+
+      refreshContacts
 
       vbox1.addWidget @table
 
@@ -339,6 +336,22 @@ if $PROGRAM_NAME == __FILE__
     def refreshText
       importmessages
       Message::refreshTextBox(@table2)
+    end
+
+    def refreshContacts
+      db = PG.connect(
+        dbname: 'cryptochat',
+        user: 'cryptochat',
+        password: 'haslo'
+      )
+      kont = db.exec("SELECT * FROM chatcontacts")
+
+      i = -1
+
+        kont.each do |row|
+          @table.setItem(i+=1 , 0, Qt::TableWidgetItem.new("#{row['name']}"))
+        end
+      db.close
     end
 
     def sendText
@@ -393,6 +406,10 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def addcontact
+      users = 'http://138.68.173.185/cryptochat/product/users.php'
+      response = RestClient.get(users)
+      @parsed_users = JSON.parse(response)
+
       counter = 0
       x = @parsed_users["records"].length
       login = Qt::InputDialog.getText self, "Adding a Contact",
@@ -414,6 +431,8 @@ if $PROGRAM_NAME == __FILE__
           db.exec("INSERT INTO chatcontacts(name, serverid) VALUES ($1, $2)", [login, serverid])
         db.close
         Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
+        @table.insertRow(@table.rowCount)
+        refreshContacts
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
         end
@@ -429,6 +448,7 @@ if $PROGRAM_NAME == __FILE__
         password: 'haslo'
       )
       kont = db.exec("SELECT * FROM chatcontacts")
+      x = kont.cmdtuples
 
       kont.each do |row|
         if("#{row['name']}" == login)
@@ -438,6 +458,8 @@ if $PROGRAM_NAME == __FILE__
         if counter == 1
           db.exec("DELETE FROM chatcontacts WHERE name=$1", [login])
           Qt::MessageBox.about self, 'Deleted!', "Deleted contact #{login}!"
+          @table.removeRow(x-1)
+          refreshContacts
         else
           Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
         end
