@@ -23,6 +23,7 @@ if $PROGRAM_NAME == __FILE__
   # Getting serverID from argument of starting program << login.rb system call
   $serverid = ARGV[0]
   $connectID = ''
+  $last_message = [nil, nil, nil]
   # puts $serverid
 
   # QtApp patch for cryptoChat satisfy
@@ -80,7 +81,7 @@ if $PROGRAM_NAME == __FILE__
       setFixedSize(560, 600)
       setStyleSheet("background-color:
                      qlineargradient(x1: 0, y1:1.2, x2:0, y2:0,
-                     stop:0 #00CDAA, stop:1 #004E40);");
+                     stop:0 #00CDAA, stop:1 #004E40);")
       show
     end
 
@@ -289,6 +290,7 @@ if $PROGRAM_NAME == __FILE__
       @table2.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
       @table2.setWordWrap(true)
       @table2.setShowGrid(false)
+      @table2.scrollToBottom
 
       @table.resize(150, 510)
       @table.move(390, 40)
@@ -335,7 +337,6 @@ if $PROGRAM_NAME == __FILE__
     def refreshText
       importmessages
       Message::refreshTextBox(@table2)
-      @table2.resizeRowsToContents
     end
 
     def sendText
@@ -453,7 +454,10 @@ if $PROGRAM_NAME == __FILE__
         x = 0
       end
 
-      clearHistory
+      if $connectID != $old_connect_ID
+        clearHistory
+        $old_connect_ID = $connectID
+      end
 
       db = PG.connect(
         dbname: 'cryptochat',
@@ -478,6 +482,7 @@ if $PROGRAM_NAME == __FILE__
         user: 'cryptochat',
         password: 'haslo'
       )
+      $old_connect_ID = $connectID
       connectIDserver = db.exec("SELECT serverid FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
       $connectID = connectIDserver[0]['serverid']
       db.close
