@@ -541,7 +541,7 @@ if $PROGRAM_NAME == __FILE__
         password: 'haslo'
       )
       $old_connect_ID = $connectID
-      connectIDserver = db.exec("SELECT serverid FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
+      connectIDserver = db.exec("SELECT serverid, key FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")
       $connectID = connectIDserver[0]['serverid']
       $conv_key = connectIDserver[0]['key']
       db.close
