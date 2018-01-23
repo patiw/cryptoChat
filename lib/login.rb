@@ -3,6 +3,16 @@
   require './message'
   require 'rest-client'
   require 'json'
+  require 'openssl'
+
+class String
+  def pass_to_hex
+    string = ''
+    # string += "0x"
+    self.each_char { |chr| string += chr.ord.to_s(16) }
+    string
+  end
+end
 
 class QtApp < Qt::Widget
 
@@ -150,6 +160,10 @@ end
     login = login.text
     password = password.text
 
+    sha256 = OpenSSL::Digest::SHA256.new
+    pass_sha = password.pass_to_hex
+    pass_sha = sha256.digest(pass_sha)
+    pass_sha = pass_sha.pass_to_hex
     # connect to server
     users = 'http://138.68.173.185/cryptochat/product/users.php'
     response = RestClient.get(users)
@@ -160,7 +174,7 @@ end
 
     # checking if user is in our database
     (0...x).each do |i|
-      if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == password)
+      if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == pass_sha)
         counter = 1
         @response_serverid = parsed_users["records"][i]["serverID"]
       end
@@ -194,7 +208,11 @@ end
     if(one == 0 || two == 0)
       Qt::MessageBox.about @messageBox, 'Trouble!', 'Didnt get your login and/or password. Try again.'
     else
-      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{one}&password=#{two}"
+      sha256 = OpenSSL::Digest::SHA256.new
+      pass_sha = two.pass_to_hex
+      pass_sha = sha256.digest(pass_sha)
+      pass_sha = pass_sha.pass_to_hex
+      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{one}&password=#{pass_sha}"
       RestClient.post(url, " ")
       Qt::MessageBox.about @messageBox, 'Nice one!', 'Thanks for signing up!'
     end

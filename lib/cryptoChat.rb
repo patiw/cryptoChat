@@ -418,26 +418,28 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def importcontacts
-      db = PG.connect(
-        dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
-      )
-        name = Qt::FileDialog::getOpenFileName self, 'Choose a file', '/home'
+      name = Qt::FileDialog::getOpenFileName self, 'Choose a file', '/home'
 
+      unless name.nil?
         nazwa = Qt::FileInfo.new(name)
         plik = nazwa.fileName
 
         kontakty = File.open(plik, 'r')
 
+        db = PG.connect(
+          dbname: 'cryptochat',
+          user: 'cryptochat',
+          password: 'haslo'
+        )
+
         while (line = kontakty.gets)
           cos = line.split
           db.exec("INSERT INTO chatcontacts(name, serverid) VALUES($1, $2)", [cos[0], cos[1]])
         end
-
-      db.close
-      kontakty.close
-      Qt::MessageBox.about @messageBox, 'Import!', "Contacts imported from #{plik}!"
+        kontakty.close
+        db.close
+        Qt::MessageBox.about @messageBox, 'Import!', "Contacts imported from #{plik}!"
+      end
     end
 
     def addcontact
@@ -499,7 +501,7 @@ if $PROGRAM_NAME == __FILE__
           @table.removeRow(x-1)
           refreshContacts
         else
-          Qt::MessageBox.about @messageBox, 'Oops!', "We have not such contact in our database!"
+          Qt::MessageBox.about @messageBox, 'Oops!', "We have not such contact in our database or you clicked cancel!"
         end
       db.close
     end
