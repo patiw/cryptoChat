@@ -8,7 +8,6 @@ class Array
   end
 
   # PC1 permutation
-  # Return 56 bits "K+" from original key"K"
   def pc1
     perm "
       57 49 41 33 25 17  9
@@ -34,8 +33,7 @@ class Array
       46 42 50 36 29 32"
   end
 
-  # Initial permutation, first action preform on message
-  # Inputs 64 bits, outputs 64 bits
+  # Initial permutation, first thing used on message
   def ip
     perm "
       58 50 42 34 26 18 10 2
@@ -49,7 +47,6 @@ class Array
   end
 
   # E-Bit selection table
-  # Inputs 32 bits and outputs 48 bits
   def e_bits
     perm "
       32  1  2  3  4  5
@@ -63,7 +60,6 @@ class Array
   end
 
   # The P permutation
-  # Inputs 32 bits, outputs 32 bits
   def perm_p
     perm "
       16  7 20 21
@@ -77,7 +73,6 @@ class Array
   end
 
   # The IP^-1 final permutation
-  # Inputs 64 bits, outputs 64 bits
   def ip_inverse
     perm "
       40 8 48 16 56 24 64 32
@@ -158,28 +153,28 @@ class Array
     row = self.first*2 + self.last
     # The column is from the middle 4 bits
     col = self[1]*8 + self[2]*4 + self[3]*2 + self[4]
-    # Find correct value, then convert to 4 bits output
+    # Finds correct value and convert to 4 bits output
     return s_table[row*16+col].to_i.to_bits
   end
 
-  # Shift this array one or two bits left
+  # Shift this array n bits left
   def left(n)
     self[n,self.length] + self[0,n]
   end
 
-  # Xor operation on two arrays
+  # Xor operation on arrays
   def xor(b)
     i=0
     self.map{|a| i+=1; a^b[i-1]}
   end
 
-  # Split array in half
+  # Splits array in half
   def split
     [self[0,self.length/2], self[self.length/2,self.length/2]]
   end
 
   # Splits into arrays of 6 bits
-  def split6
+  def split_six
     arr=[]
     subarr=[]
     self.each{|a|
@@ -290,7 +285,7 @@ end
 # Functions used in program
 ##################################
 class Encryption
-  #Initialize class with input
+  # Initialize class with message and key
   def initialize(message, conv_key)
     @message = message
     @key = conv_key
@@ -309,11 +304,11 @@ class Encryption
     return cdn
   end
 
-  # Function used in the encryption rounds
-  def f(r,k)
+  # Func used in encryption rounds
+  def f_rounds(r,k)
     e = r.e_bits
     x = e.xor(k)
-    bs = x.split6
+    bs = x.split_six
     s = []
     bs.each_with_index{|b,i| s += b.s_box(i+1)}
     return s.perm_p
@@ -331,9 +326,9 @@ class Encryption
   def des_encrypt(m,keys)
     ip = m.ip
     l, r = ip.split
-    (1..16).each{|i| l, r = r, l.xor(f(r,keys[i]))}
+    (1..16).each{|i| l, r = r, l.xor(f_rounds(r,keys[i]))}
     rl = r + l
-    c = rl.ip_inverse #calculate final text
+    c = rl.ip_inverse # calculate final text
     return c
   end
 
@@ -342,13 +337,13 @@ class Encryption
     ip = m.ip
     l, r = ip.split
     # Run rounds
-    (1..16).to_a.reverse.each{|i| l, r = r, l.xor(f(r,keys[i]))}
+    (1..16).to_a.reverse.each{|i| l, r = r, l.xor(f_rounds(r,keys[i]))}
     rl = r + l
-    c = rl.ip_inverse #calculate final text
+    c = rl.ip_inverse # calculate final text
     return c
   end
 
-  # Encrypt a 64-bit message with key
+  # Encrypt a 64-bit message and 128-bit key
   def tripledes_encrypt
     key = @key.to_bits
     key_a, key_b = key.split  # Splits the key in two keys
@@ -361,7 +356,7 @@ class Encryption
     return c                   # Returns the encrypted array
   end
 
-  # Decrypt a 64-bit message with key
+  # Decrypt a 64-bit message and 128-bit key
   def tripledes_decrypt
     key = @key.to_bits
     key_a, key_b = key.split   # Splits the key in two keys
@@ -371,6 +366,6 @@ class Encryption
     c = des_decrypt(c, keys_a)  # Use first key
     c = des_encrypt(c, keys_b)  # Use second key
     c = des_decrypt(c, keys_a)  # Use first key again
-    return c # Returns the decrypted array
+    return c                    # Returns the decrypted array
   end
 end

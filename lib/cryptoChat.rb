@@ -1,35 +1,25 @@
 #!/usr/bin/env ruby
-
-# Test of Qt-lib
-
 # Requested gems and files
-  require 'Qt4'
-  require './connection'
-  require './encryption'
-  require './message'
-  require './user'
-  require './key'
-  require 'thread'
-  require 'rest-client'
-  require 'json'
-  gem 'pg'
-  require 'pg'
-  # in future classes gonna be pushed outside and linked here
-  # awaiting for Patryk to decide on server choice
+require 'Qt4'
+require './encryption'
+require './message'
+require './key'
+require 'thread'
+require 'rest-client'
+require 'json'
+gem 'pg'
+require 'pg'
 
 # "main"
 if $PROGRAM_NAME == __FILE__
-
   # Getting serverID from argument of starting program << login.rb system call
   $serverid = ARGV[0]
   $connectID = ''
   $last_message = ['', '', '1970-01-01 22:22:22']
   $old_rows_count = 0
   $new_rows_count = 0
-  # puts $serverid
 
   # QtApp patch for cryptoChat satisfy
-
   class QtApp < Qt::MainWindow
     attr_writer :on_time_up
     slots 'about()', 'sendText()', 'refreshText()', 'trunc()', 'clearHistory()',\
@@ -131,9 +121,9 @@ if $PROGRAM_NAME == __FILE__
                           color: yellow;
                         }"
 
-      screen_prop = Qt::Rect.new
+      # screen_prop = Qt::Rect.new
       screen_prop = Qt::Application.desktop.availableGeometry
-      screen_center = Qt::Point.new
+      # screen_center = Qt::Point.new
       screen_center = screen_prop.center
       screen_x = screen_center.x - screen_prop.width * 0.25
       screen_y = screen_center.y - screen_prop.height * 0.25
