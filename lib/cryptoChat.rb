@@ -108,6 +108,41 @@ if $PROGRAM_NAME == __FILE__
       set_new_key = Qt::Action.new '&Set new key for conversation', self
       show_the_key = Qt::Action.new '&Show actual key', self
 
+      messageBoxStyle = "QDialog {
+                          background-color: #009A80;
+                         }
+                         QLabel {
+                          font-size: 14px;
+                          background-color: transparent;
+                         }
+                         QPushButton {
+                          background-color: #009A80;
+                          border-style: solid;
+                          border-width:1px;
+                          border-radius:10px;
+                          border-color: #D9FFF8;
+                          max-width:100px;
+                          max-height:50px;
+                          min-width:60px;
+                          min-height:30px;
+                        }
+                        QPushButton:pressed {
+                          background-color: #004E40;
+                          color: yellow;
+                        }"
+
+      screen_prop = Qt::Rect.new
+      screen_prop = Qt::Application.desktop.availableGeometry
+      screen_center = Qt::Point.new
+      screen_center = screen_prop.center
+      screen_x = screen_center.x - screen_prop.width * 0.25
+      screen_y = screen_center.y - screen_prop.height * 0.25
+
+      @messageBox = Qt::Dialog.new(self)
+      @messageBox.adjustSize
+      @messageBox.move(screen_x, screen_y)
+      @messageBox.setStyleSheet(messageBoxStyle)
+
       @menuBar = Qt::MenuBar.new(self)
       @menuBar.setGeometry(Qt::Rect.new(0, 0, 800, 60))
       @menuBar.setStyleSheet("QMenuBar {
@@ -293,7 +328,7 @@ if $PROGRAM_NAME == __FILE__
       @table2.setEditTriggers(Qt::AbstractItemView::NoEditTriggers)
       @table2.setWordWrap(true)
       @table2.setShowGrid(false)
-      @table2.scrollToBottom
+      @table2.setSelectionMode(Qt::AbstractItemView::NoSelection)
 
       @table.resize(150, 510)
       @table.move(390, 40)
@@ -327,7 +362,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def about
-      Qt::MessageBox.about self, 'About', 'Zobaczymy'
+      Qt::MessageBox.about @messageBox, 'About', 'Zobaczymy'
     end
 
     def clearHistory
@@ -357,11 +392,10 @@ if $PROGRAM_NAME == __FILE__
 
     def sendText
       if $connectID == ''
-        Qt::MessageBox.about self, 'Error', 'You dunno de wae'
+        Qt::MessageBox.about @messageBox, 'Error', 'You dunno de wae'
       else
-        Message::sendTextBox(@edit2, @table2)
+        Message::sendTextBox(@edit2)
         @edit2.clear
-        @table2.insertRow(@table2.rowCount)
       end
     end
 
@@ -380,7 +414,7 @@ if $PROGRAM_NAME == __FILE__
         end
       db.close
       kontakty.close
-      Qt::MessageBox.about self, 'Export!', "Contacts exported to contacts.txt!"
+      Qt::MessageBox.about @messageBox, 'Export!', "Contacts exported to contacts.txt!"
     end
 
     def importcontacts
@@ -403,7 +437,7 @@ if $PROGRAM_NAME == __FILE__
 
       db.close
       kontakty.close
-      Qt::MessageBox.about self, 'Import!', "Contacts imported from #{plik}!"
+      Qt::MessageBox.about @messageBox, 'Import!', "Contacts imported from #{plik}!"
     end
 
     def addcontact
@@ -413,11 +447,11 @@ if $PROGRAM_NAME == __FILE__
 
       counter = 0
       x = @parsed_users["records"].length
-      login = Qt::InputDialog.getText self, "Adding a Contact",
+      login = Qt::InputDialog.getText @messageBox, "Adding a Contact",
           "Enter the name: "
-      serverid = Qt::InputDialog.getText self, "Adding a Contact",
+      serverid = Qt::InputDialog.getText @messageBox, "Adding a Contact",
           "Enter the serverID: "
-      key_input = Qt::InputDialog.getText self, "Adding a Contact",
+      key_input = Qt::InputDialog.getText @messageBox, "Adding a Contact",
           "Enter the key: "
 
         (0...x).each do |i|
@@ -434,17 +468,17 @@ if $PROGRAM_NAME == __FILE__
           db.exec("INSERT INTO chatcontacts(name, serverid, key) VALUES ($1, $2, $3)", \
                   [login, serverid, key_input])
         db.close
-        Qt::MessageBox.about self, 'Added!', "Added contact #{login}!"
+        Qt::MessageBox.about @messageBox, 'Added!', "Added contact #{login}!"
         @table.insertRow(@table.rowCount)
         refreshContacts
         else
-          Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
+          Qt::MessageBox.about @messageBox, 'Oops!', "We have not such contact in our database!"
         end
     end
 
     def deletecontact
       counter = 0
-      login = Qt::InputDialog.getText self, "Delete a Contact",
+      login = Qt::InputDialog.getText @messageBox, "Delete a Contact",
           "Enter a name: "
       db = PG.connect(
         dbname: 'cryptochat',
@@ -461,11 +495,11 @@ if $PROGRAM_NAME == __FILE__
       end
         if counter == 1
           db.exec("DELETE FROM chatcontacts WHERE name=$1", [login])
-          Qt::MessageBox.about self, 'Deleted!', "Deleted contact #{login}!"
+          Qt::MessageBox.about @messageBox, 'Deleted!', "Deleted contact #{login}!"
           @table.removeRow(x-1)
           refreshContacts
         else
-          Qt::MessageBox.about self, 'Oops!', "We have not such contact in our database!"
+          Qt::MessageBox.about @messageBox, 'Oops!', "We have not such contact in our database!"
         end
       db.close
     end
@@ -508,20 +542,20 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def showserverid
-      Qt::MessageBox.about self, 'My ServerID', "ServerID: #{$serverid}"
+      Qt::MessageBox.about @messageBox, 'My ServerID', "ServerID: #{$serverid}"
     end
 
     def gen_new_key
       random_key = GenerateKey::genkey
-      Qt::MessageBox.about self, 'Generation', "Random key: \n#{random_key}"
+      Qt::MessageBox.about @messageBox, 'Generation', "Random key: \n#{random_key}"
     end
 
     def show_conv_key
-      Qt::MessageBox.about self, 'My key', "Key: \n#{$conv_key}"
+      Qt::MessageBox.about @messageBox, 'My key', "Key: \n#{$conv_key}"
     end
 
     def set_conv_key
-      new_key_input = Qt::InputDialog.getText self, "Setting new key",
+      new_key_input = Qt::InputDialog.getText @messageBox, "Setting new key",
                       "Enter new key: "
 
       unless new_key_input.nil?
@@ -535,11 +569,11 @@ if $PROGRAM_NAME == __FILE__
           db.exec("UPDATE chatcontacts SET key = '#{new_key_input}' WHERE serverid = '#{$connectID}'")
 
           db.close
-          Qt::MessageBox.about self, 'Setting new key', "Done!"
+          Qt::MessageBox.about @messageBox, 'Setting new key', "Done!"
           $conv_key = new_key_input
         else
           puts new_key_input.length
-          Qt::MessageBox.about self, 'Oops!', "You entered the key in a wrong way!\nCheck the length of key or maybe you missed some spaces."
+          Qt::MessageBox.about @messageBox, 'Oops!', "You entered the key in a wrong way!\nCheck the length of key or maybe you missed some spaces."
         end
       end
     end
@@ -555,7 +589,7 @@ if $PROGRAM_NAME == __FILE__
       $connectID = connectIDserver[0]['serverid']
       $conv_key = connectIDserver[0]['key']
       db.close
-      Qt::MessageBox.about self, 'cryptoChat', "Connected to #{@table.item(x, y).text()}"
+      Qt::MessageBox.about @messageBox, 'cryptoChat', "Connected to #{@table.item(x, y).text()}"
     end
   end
 

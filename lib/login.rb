@@ -26,6 +26,41 @@ end
 
   def init_ui
 
+    messageBoxStyle = "QDialog {
+                        background-color: #009A80;
+                       }
+                       QLabel {
+                        font-size: 14px;
+                        background-color: transparent;
+                       }
+                       QPushButton {
+                        background-color: #009A80;
+                        border-style: solid;
+                        border-width:1px;
+                        border-radius:10px;
+                        border-color: #D9FFF8;
+                        max-width:100px;
+                        max-height:50px;
+                        min-width:60px;
+                        min-height:30px;
+                      }
+                      QPushButton:pressed {
+                        background-color: #004E40;
+                        color: yellow;
+                      }"
+
+    screen_prop = Qt::Rect.new
+    screen_prop = Qt::Application.desktop.availableGeometry
+    screen_center = Qt::Point.new
+    screen_center = screen_prop.center
+    screen_x = screen_center.x - screen_prop.width * 0.25
+    screen_y = screen_center.y - screen_prop.height * 0.25
+
+    @messageBox = Qt::Dialog.new(self)
+    @messageBox.adjustSize
+    @messageBox.move(screen_x, screen_y)
+    @messageBox.setStyleSheet(messageBoxStyle)
+
     loginButt = Qt::PushButton.new "Login", self
     signupButt = Qt::PushButton.new "Sign Up", self
     quitButt = Qt::PushButton.new "Wyjdz", self
@@ -136,20 +171,20 @@ end
       exec(start_string)
       exit
     else
-      Qt::MessageBox.about self, 'Trouble!', 'Wrong login and/or password. Try again.'
+      Qt::MessageBox.about @messageBox, 'Trouble!', 'Wrong login and/or password. Try again.'
     end
   end
 
   def signup
 
     # made two separated windows for register, will change in future
-    one = Qt::InputDialog.getText self, "Sign Up",
+    one = Qt::InputDialog.getText @messageBox, "Sign Up",
         "Enter your login"
     # cosmetic things
         if one == nil
           one = 0
         end
-    two = Qt::InputDialog.getText self, "Sign Up",
+    two = Qt::InputDialog.getText @messageBox, "Sign Up",
         "Enter your password"
     # just cosmetic
         if two == nil
@@ -157,11 +192,11 @@ end
         end
 
     if(one == 0 || two == 0)
-      Qt::MessageBox.about self, 'Trouble!', 'Didnt get your login and/or password. Try again.'
+      Qt::MessageBox.about @messageBox, 'Trouble!', 'Didnt get your login and/or password. Try again.'
     else
       url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{one}&password=#{two}"
       RestClient.post(url, " ")
-      Qt::MessageBox.about self, 'Nice one!', 'Thanks for signing up!'
+      Qt::MessageBox.about @messageBox, 'Nice one!', 'Thanks for signing up!'
     end
   end
 
