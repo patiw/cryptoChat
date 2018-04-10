@@ -1,11 +1,13 @@
-  require 'Qt'
-  require './encryption'
-  require './message'
-  require 'rest-client'
-  require 'json'
-  require 'openssl'
+require 'Qt'
+require './encryption'
+require './message'
+require 'rest-client'
+require 'json'
+require 'openssl'
 
+# Patches for string class
 class String
+  # Convert password string to hex format
   def pass_to_hex
     string = ''
     # string += "0x"
@@ -15,7 +17,6 @@ class String
 end
 
 class QtApp < Qt::Widget
-
   slots 'zaloguj()', 'signup()'
 
     def initialize
@@ -148,12 +149,12 @@ end
     @passwd.move 170, 400
   end
 
+  # Login into app
   def zaloguj
-
     checkIfValid(@loginEdit, @passwd)
-
   end
 
+  # Check if login data is vaild
   def checkIfValid(login, password)
 
     counter = 0
@@ -165,32 +166,34 @@ end
     pass_sha = sha256.digest(pass_sha)
     pass_sha = pass_sha.pass_to_hex
     # connect to server
-    users = 'http://138.68.173.185/cryptochat/product/users.php'
+    users = 'https://api.iwaniuk.xyz/cryptochat/product/users.php'
     response = RestClient.get(users)
     parsed_users = JSON.parse(response)
 
     # checking how many users we have in database
-    x = parsed_users["records"].length
+    unless parsed_users["message"] == 'No users found.'
+      x = parsed_users["records"].length
 
-    # checking if user is in our database
-    (0...x).each do |i|
-      if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == pass_sha)
-        counter = 1
-        @response_serverid = parsed_users["records"][i]["serverID"]
+      # checking if user is in our database
+      (0...x).each do |i|
+        if(parsed_users["records"][i]["login"] == login && parsed_users["records"][i]["password"] == pass_sha)
+          counter = 1
+          @response_serverid = parsed_users["records"][i]["serverID"]
+        end
       end
-    end
 
-    if counter == 1
-      start_string = './cryptoChat.rb ' << @response_serverid
-      exec(start_string)
-      exit
-    else
-      Qt::MessageBox.about @messageBox, 'Trouble!', 'Wrong login and/or password. Try again.'
+      if counter == 1
+        start_string = './cryptoChat.rb ' << @response_serverid
+        exec(start_string)
+        exit
+      else
+        Qt::MessageBox.about @messageBox, 'Trouble!', 'Wrong login and/or password. Try again.'
+      end
     end
   end
 
+# Register function
   def signup
-
     # made two separated windows for register, will change in future
     one = Qt::InputDialog.getText @messageBox, "Sign Up",
         "Enter your login"
@@ -212,7 +215,7 @@ end
       pass_sha = two.pass_to_hex
       pass_sha = sha256.digest(pass_sha)
       pass_sha = pass_sha.pass_to_hex
-      url = "http://138.68.173.185/cryptochat/product/adduser.php?login=#{one}&password=#{pass_sha}"
+      url = "https://api.iwaniuk.xyz/cryptochat/product/adduser.php?login=#{one}&password=#{pass_sha}"
       RestClient.post(url, " ")
       Qt::MessageBox.about @messageBox, 'Nice one!', 'Thanks for signing up!'
     end

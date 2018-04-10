@@ -79,7 +79,7 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def init_ui
-      users = 'http://138.68.173.185/cryptochat/product/users.php'
+      users = 'https://api.iwaniuk.xyz/cryptochat/product/users.php'
       response = RestClient.get(users)
       @parsed_users = JSON.parse(response)
 
@@ -352,18 +352,24 @@ if $PROGRAM_NAME == __FILE__
     end
 
     def about
-      Qt::MessageBox.about @messageBox, 'About', 'Zobaczymy'
+      Qt::MessageBox.about @messageBox, 'About', 'Aby wybrać kontakt, kliknij dwukrotnie na wybranym kontakcie
+      Aby dodać kontakt, wybierz opcję Add new contact i podążaj za wskazówkami
+      W razie gwałtownego spowolnienia programu, użyj opcji Clear chat window
+      W razie problemów, skontaktuj się z twóracami na https://github.com/patiw/cryptoChat'
     end
 
+    # Clears table with messages
     def clearHistory
       Message::deleteContent(@table2)
     end
 
+    # Refresh text(messages) in table widget
     def refreshText
       importmessages
       Message::refreshTextBox(@table2)
     end
 
+    # Refresh contacts in table "contact"
     def refreshContacts
       db = PG.connect(
         dbname: 'cryptochat',
@@ -389,6 +395,7 @@ if $PROGRAM_NAME == __FILE__
       end
     end
 
+    # Exports contacts to "contacts.txt" file
     def exportcontacts
       db = PG.connect(
         dbname: 'cryptochat',
@@ -407,6 +414,7 @@ if $PROGRAM_NAME == __FILE__
       Qt::MessageBox.about @messageBox, 'Export!', "Contacts exported to contacts.txt!"
     end
 
+    # Imports contacts from chosen file
     def importcontacts
       name = Qt::FileDialog::getOpenFileName self, 'Choose a file', '/home'
 
@@ -432,8 +440,9 @@ if $PROGRAM_NAME == __FILE__
       end
     end
 
+    # Add connect to tabel "contacts"
     def addcontact
-      users = 'http://138.68.173.185/cryptochat/product/users.php'
+      users = 'https://api.iwaniuk.xyz/cryptochat/product/users.php'
       response = RestClient.get(users)
       @parsed_users = JSON.parse(response)
 
@@ -498,7 +507,7 @@ if $PROGRAM_NAME == __FILE__
 
     # to musi byc user1, user2, userID musi byc wysylany
     def importmessages
-      urliu = "http://138.68.173.185/cryptochat/product/messages.php?user1=#{$serverid}&user2=#{$connectID}"
+      urliu = "https://api.iwaniuk.xyz/cryptochat/product/messages.php?user1=#{$serverid}&user2=#{$connectID}"
       responsea = RestClient.get(urliu)
       mestab = JSON.parse(responsea)
 
