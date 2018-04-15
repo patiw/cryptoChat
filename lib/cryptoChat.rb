@@ -18,6 +18,7 @@ if $PROGRAM_NAME == __FILE__
   $last_message = ['', '', '1970-01-01 22:22:22']
   $old_rows_count = 0
   $new_rows_count = 0
+  $my_name = `whoami`.chomp
 
   # QtApp patch for cryptoChat satisfy
   class QtApp < Qt::MainWindow
@@ -31,11 +32,11 @@ if $PROGRAM_NAME == __FILE__
       super
 
       puts 'Version of libpg: ' + PG.library_version.to_s
+      puts $my_name
       def with_db
         db = PG.connect(
           dbname: 'cryptochat',
-          user: 'cryptochat',
-          password: 'haslo'
+          user: "#{$my_name}"
         )
         begin
            yield db
@@ -298,8 +299,7 @@ if $PROGRAM_NAME == __FILE__
 
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
       kont = db.exec("SELECT * FROM chatcontacts")
       # wiad = db.exec("SELECT * FROM chatmessages")
@@ -373,8 +373,7 @@ if $PROGRAM_NAME == __FILE__
     def refreshContacts
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
       kont = db.exec("SELECT * FROM chatcontacts")
 
@@ -399,8 +398,7 @@ if $PROGRAM_NAME == __FILE__
     def exportcontacts
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
         kont = db.exec("SELECT * FROM chatcontacts")
 
@@ -426,8 +424,7 @@ if $PROGRAM_NAME == __FILE__
 
         db = PG.connect(
           dbname: 'cryptochat',
-          user: 'cryptochat',
-          password: 'haslo'
+          user: "#{$my_name}",
         )
 
         while (line = kontakty.gets)
@@ -463,8 +460,7 @@ if $PROGRAM_NAME == __FILE__
         if counter == 1
         db = PG.connect(
           dbname: 'cryptochat',
-          user: 'cryptochat',
-          password: 'haslo'
+          user: "#{$my_name}",
         )
           db.exec("INSERT INTO chatcontacts(name, serverid, key) VALUES ($1, $2, $3)", \
                   [login, serverid, key_input])
@@ -483,8 +479,7 @@ if $PROGRAM_NAME == __FILE__
           "Enter a name: "
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
       kont = db.exec("SELECT * FROM chatcontacts")
       x = kont.cmdtuples
@@ -519,8 +514,7 @@ if $PROGRAM_NAME == __FILE__
 
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
 
       if $connectID != $old_connect_ID
@@ -564,8 +558,7 @@ if $PROGRAM_NAME == __FILE__
         if new_key_input.length == 143
           db = PG.connect(
             dbname: 'cryptochat',
-            user: 'cryptochat',
-            password: 'haslo'
+            user: "#{$my_name}",
           )
           db.exec("UPDATE chatcontacts SET key = '#{new_key_input}' WHERE serverid = '#{$connectID}'")
 
@@ -582,8 +575,7 @@ if $PROGRAM_NAME == __FILE__
     def proba(x, y)
       db = PG.connect(
         dbname: 'cryptochat',
-        user: 'cryptochat',
-        password: 'haslo'
+        user: "#{$my_name}",
       )
       $old_connect_ID = $connectID
       connectIDserver = db.exec("SELECT serverid, key FROM chatcontacts WHERE name='#{@table.item(x, y).text()}'")

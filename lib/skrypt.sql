@@ -1,11 +1,11 @@
-CREATE TABLE chatUser(
+CREATE TABLE chatuser(
    id       SERIAL    PRIMARY KEY NOT NULL,
    serverID VARCHAR,
    login    VARCHAR   NOT NULL,
    password VARCHAR   NOT NULL
 );
 
-CREATE TABLE chatMessages(
+CREATE TABLE chatmessages(
 	id        SERIAL    PRIMARY KEY NOT NULL,
 	sender    VARCHAR   NOT NULL,
 	receiver  VARCHAR   NOT NULL,
@@ -13,10 +13,10 @@ CREATE TABLE chatMessages(
 	text      TEXT
 );
 
-CREATE TABLE chatContacts(
+CREATE TABLE chatcontacts(
 	id        SERIAL    PRIMARY KEY NOT NULL,
 	name      VARCHAR   NOT NULL,
-	serverID  VARCHAR   NOT NULL
+	serverID  VARCHAR   NOT NULL,
   key       VARCHAR
 );
 
